@@ -894,24 +894,24 @@ export default function NewBondPage() {
   }
 
   return (
-    <div className="px-8 py-8 max-w-2xl">
+    <div className="px-4 py-4 md:px-8 md:py-8 max-w-2xl">
       {/* Page header */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-4 transition-colors"
+          className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-4 transition-colors min-h-[44px]"
         >
           <ChevronLeft className="w-4 h-4" />
           Back
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">Add New Bond</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Add New Bond</h1>
       </div>
 
       {/* Progress */}
       <ProgressBar current={step} />
 
       {/* Step content */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 mb-6">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-8 mb-6">
         {step === 0 && <StepDefendant form={defendant} setForm={setDefendant} />}
         {step === 1 && <StepBond form={bond} setForm={setBond} />}
         {step === 2 && <StepCosigner cosigners={cosigners} setCosigners={setCosigners} />}
@@ -938,13 +938,13 @@ export default function NewBondPage() {
       )}
 
       {/* Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={back}
           disabled={step === 0}
           className={clsx(
-            'flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold transition-colors',
+            'flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold transition-colors min-h-[44px]',
             step === 0
               ? 'text-gray-300 cursor-not-allowed'
               : 'text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -958,7 +958,7 @@ export default function NewBondPage() {
           <button
             type="button"
             onClick={next}
-            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors"
+            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors min-h-[44px]"
           >
             Next Step
             <ChevronRight className="w-4 h-4" />
@@ -968,7 +968,7 @@ export default function NewBondPage() {
             type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="flex items-center gap-2 bg-green-700 text-white px-8 py-3 rounded-xl text-base font-semibold hover:bg-green-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-green-700 text-white px-8 py-3 rounded-xl text-base font-semibold hover:bg-green-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed min-h-[44px]"
           >
             {submitting ? 'Saving…' : 'Save Bond'}
             {!submitting && <Check className="w-4 h-4" />}

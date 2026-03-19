@@ -127,14 +127,14 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-2.5 rounded-xl font-medium text-base hover:bg-[#1a2f5a] transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-3 rounded-xl font-medium text-base hover:bg-[#1a2f5a] transition-colors disabled:opacity-60 min-h-[44px]"
           >
             <Check className="w-4 h-4" />
             {saving ? 'Saving…' : 'Save Changes'}
           </button>
           <button
             onClick={handleCancel}
-            className="px-5 py-2.5 rounded-xl font-medium text-base border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+            className="px-5 py-3 rounded-xl font-medium text-base border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors min-h-[44px]"
           >
             Cancel
           </button>
@@ -157,8 +157,8 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
         <button
           onClick={() => setEditing(true)}
           className={clsx(
-            'flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg border border-gray-300',
-            'text-gray-700 hover:bg-gray-50 transition-colors'
+            'flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg border border-gray-300',
+            'text-gray-700 hover:bg-gray-50 transition-colors min-h-[44px]'
           )}
         >
           <Pencil className="w-4 h-4" />

@@ -19,7 +19,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendSMS } from '@/lib/sms'
-import { verifyCronRequest, unauthorizedResponse } from '@/lib/cron'
+import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { format, addDays, parseISO, differenceInDays } from 'date-fns'
 import { parse as parseHtml } from 'node-html-parser'
 
@@ -91,96 +91,103 @@ async function scrapeCase(
 export async function GET(request: Request) {
   if (!verifyCronRequest(request)) return unauthorizedResponse()
 
-  const supabase = await createServiceClient()
-  const today = new Date()
-  const in14 = format(addDays(today, 14), 'yyyy-MM-dd')
-  const in3  = format(addDays(today, 3),  'yyyy-MM-dd')
+  try {
+    const supabase = await createServiceClient()
+    const today = new Date()
+    const in14 = format(addDays(today, 14), 'yyyy-MM-dd')
+    const in3  = format(addDays(today, 3),  'yyyy-MM-dd')
 
-  // ── 1. Court date reminders (14-day + 3-day) ─────────────────────────────
-  const { data: reminderDates } = await supabase
-    .from('court_dates')
-    .select('*, bonds!inner(defendant_id, defendants(first_name, phone))')
-    .eq('status', 'upcoming')
-    .in('date', [in14, in3])
-
-  let reminders14 = 0, reminders3 = 0
-
-  for (const cd of reminderDates ?? []) {
-    const bond = cd.bonds as { defendant_id: string; defendants: { first_name: string; phone: string | null } | null }
-    const defendant = bond?.defendants
-    if (!defendant?.phone) continue
-
-    const daysOut = cd.date === in14 ? 14 : 3
-    const flag = daysOut === 14 ? 'reminder_sent_14d' : 'reminder_sent_3d'
-    const alreadySent = daysOut === 14 ? cd.reminder_sent_14d : cd.reminder_sent_3d
-    if (alreadySent) continue
-
-    const dateStr = format(parseISO(cd.date), 'MMMM d, yyyy')
-    const timeStr = cd.time ? ` at ${cd.time}` : ''
-    const locStr  = cd.location ? ` at ${cd.location}` : ''
-
-    await sendSMS(
-      defendant.phone,
-      `Reminder: You have a court date on ${dateStr}${timeStr}${locStr}. Reply CONFIRM to acknowledge.`
-    )
-
-    await supabase
+    // ── 1. Court date reminders (14-day + 3-day) ─────────────────────────────
+    const { data: reminderDates } = await supabase
       .from('court_dates')
-      .update({ [flag]: true })
-      .eq('id', cd.id)
+      .select('*, bonds!inner(defendant_id, defendants(first_name, phone))')
+      .eq('status', 'upcoming')
+      .in('date', [in14, in3])
 
-    if (daysOut === 14) reminders14++; else reminders3++
-  }
+    let reminders14 = 0, reminders3 = 0
 
-  // ── 2. Scrape Collin County portal for case changes ───────────────────────
-  const { data: collinBonds } = await supabase
-    .from('bonds')
-    .select('id, case_number, bondsman_id, defendant_id, court_dates(*)')
-    .eq('status', 'active')
-    .ilike('county', '%collin%')
-    .not('case_number', 'is', null)
+    for (const cd of reminderDates ?? []) {
+      const bond = cd.bonds as { defendant_id: string; defendants: { first_name: string; phone: string | null } | null }
+      const defendant = bond?.defendants
+      if (!defendant?.phone) continue
 
-  let changesDetected = 0
+      const daysOut = cd.date === in14 ? 14 : 3
+      const flag = daysOut === 14 ? 'reminder_sent_14d' : 'reminder_sent_3d'
+      const alreadySent = daysOut === 14 ? cd.reminder_sent_14d : cd.reminder_sent_3d
+      if (alreadySent) continue
 
-  for (const bond of collinBonds ?? []) {
-    if (!bond.case_number) continue
-    const scraped = await scrapeCase(bond.case_number)
-    if (scraped.length === 0) continue
+      const dateStr = format(parseISO(cd.date), 'MMMM d, yyyy')
+      const timeStr = cd.time ? ` at ${cd.time}` : ''
+      const locStr  = cd.location ? ` at ${cd.location}` : ''
 
-    const stored = (bond.court_dates ?? []) as Array<{ date: string; id: string }>
-    const storedDates = new Set(stored.map((d) => d.date))
+      await sendSMS(
+        defendant.phone,
+        `Reminder: You have a court date on ${dateStr}${timeStr}${locStr}. Reply CONFIRM to acknowledge.`
+      )
 
-    for (const found of scraped) {
-      if (storedDates.has(found.date)) continue // already known
+      await supabase
+        .from('court_dates')
+        .update({ [flag]: true })
+        .eq('id', cd.id)
 
-      // New date found on portal — save it
-      await supabase.from('court_dates').insert({
-        bond_id: bond.id,
-        date: found.date,
-        time: found.time,
-        location: found.location,
-        status: 'upcoming',
-      })
-
-      const message = `Court date change detected for case ${bond.case_number}: new hearing on ${format(parseISO(found.date), 'MMMM d, yyyy')}. Check the portal to confirm.`
-
-      await supabase.from('notifications').insert({
-        bondsman_id: bond.bondsman_id,
-        bond_id: bond.id,
-        message,
-        type: 'court_change',
-      })
-
-      const bondsmanPhone = process.env.BONDSMAN_PHONE
-      if (bondsmanPhone) await sendSMS(bondsmanPhone, `[BondTrack] ${message}`)
-
-      changesDetected++
+      if (daysOut === 14) reminders14++; else reminders3++
     }
+
+    // ── 2. Scrape Collin County portal for case changes ───────────────────────
+    const { data: collinBonds } = await supabase
+      .from('bonds')
+      .select('id, case_number, bondsman_id, defendant_id, court_dates(*)')
+      .eq('status', 'active')
+      .ilike('county', '%collin%')
+      .not('case_number', 'is', null)
+
+    let changesDetected = 0
+
+    for (const bond of collinBonds ?? []) {
+      if (!bond.case_number) continue
+      const scraped = await scrapeCase(bond.case_number)
+      if (scraped.length === 0) continue
+
+      const stored = (bond.court_dates ?? []) as Array<{ date: string; id: string }>
+      const storedDates = new Set(stored.map((d) => d.date))
+
+      for (const found of scraped) {
+        if (storedDates.has(found.date)) continue
+
+        await supabase.from('court_dates').insert({
+          bond_id: bond.id,
+          date: found.date,
+          time: found.time,
+          location: found.location,
+          status: 'upcoming',
+        })
+
+        const message = `Court date change detected for case ${bond.case_number}: new hearing on ${format(parseISO(found.date), 'MMMM d, yyyy')}. Check the portal to confirm.`
+
+        await supabase.from('notifications').insert({
+          bondsman_id: bond.bondsman_id,
+          bond_id: bond.id,
+          message,
+          type: 'court_change',
+        })
+
+        const bondsmanPhone = process.env.BONDSMAN_PHONE
+        if (bondsmanPhone) await sendSMS(bondsmanPhone, `[BondTrack] ${message}`)
+
+        changesDetected++
+      }
+    }
+
+    const total = reminders14 + reminders3 + changesDetected
+    const msg = `${reminders14} 14d reminders, ${reminders3} 3d reminders, ${changesDetected} changes`
+    console.log(`[COURT-CHECK] Done — ${msg}`)
+    await logCron('court_check', 'success', msg, total)
+
+    return Response.json({ ok: true, reminders14, reminders3, changesDetected })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[COURT-CHECK] Fatal error:', message)
+    await logCron('court_check', 'failed', message)
+    return Response.json({ ok: false, error: message }, { status: 500 })
   }
-
-  console.log(
-    `[COURT-CHECK] Done — ${reminders14} 14d reminders, ${reminders3} 3d reminders, ${changesDetected} changes`
-  )
-
-  return Response.json({ ok: true, reminders14, reminders3, changesDetected })
 }

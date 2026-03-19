@@ -16,7 +16,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendSMS } from '@/lib/sms'
-import { verifyCronRequest, unauthorizedResponse } from '@/lib/cron'
+import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { subDays, subHours, startOfDay, endOfDay } from 'date-fns'
 
 // ── Send check-ins ────────────────────────────────────────────────────────────
@@ -140,10 +140,24 @@ export async function GET(request: Request) {
   const action = searchParams.get('action') ?? 'send'
 
   if (action === 'missed') {
-    const result = await markMissedCheckIns()
-    return Response.json({ ok: true, ...result })
+    try {
+      const result = await markMissedCheckIns()
+      await logCron('checkins_missed', 'success', `Marked ${result.marked} check-ins as missed`, result.marked)
+      return Response.json({ ok: true, ...result })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      await logCron('checkins_missed', 'failed', message)
+      return Response.json({ ok: false, error: message }, { status: 500 })
+    }
   }
 
-  const result = await sendCheckIns()
-  return Response.json({ ok: true, ...result })
+  try {
+    const result = await sendCheckIns()
+    await logCron('checkins_send', 'success', `Sent ${result.sent} check-in messages`, result.sent)
+    return Response.json({ ok: true, ...result })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    await logCron('checkins_send', 'failed', message)
+    return Response.json({ ok: false, error: message }, { status: 500 })
+  }
 }

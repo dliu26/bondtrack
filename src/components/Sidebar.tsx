@@ -28,7 +28,7 @@ export default function Sidebar({ userEmail, unreadCount }: SidebarProps) {
   }
 
   return (
-    <aside className="fixed inset-y-0 left-0 w-64 bg-[#0f1e3c] flex flex-col z-10">
+    <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-[#0f1e3c] flex-col z-10">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
         <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/10">

@@ -62,9 +62,9 @@ export default function NotificationsList({
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Notifications</h1>
           {unreadCount > 0 && (
             <span className="bg-red-500 text-white text-sm font-bold px-2.5 py-0.5 rounded-full">
               {unreadCount} unread
@@ -75,10 +75,11 @@ export default function NotificationsList({
           <button
             onClick={handleMarkAll}
             disabled={markingAll}
-            className="flex items-center gap-2 text-base font-medium text-gray-600 border border-gray-300 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-600 border border-gray-300 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-60 min-h-[44px] shrink-0"
           >
             <CheckCheck className="w-4 h-4" />
-            {markingAll ? 'Marking…' : 'Mark All Read'}
+            <span className="hidden sm:inline">{markingAll ? 'Marking…' : 'Mark All Read'}</span>
+            <span className="sm:hidden">{markingAll ? '…' : 'Mark All'}</span>
           </button>
         )}
       </div>

@@ -52,11 +52,11 @@ export default async function DefendantPage({ params }: Props) {
   const inactiveBonds = bonds.filter((b) => b.status !== 'active')
 
   return (
-    <div className="px-8 py-8 max-w-4xl">
+    <div className="px-4 py-4 md:px-8 md:py-8 max-w-4xl">
       {/* Back */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-5 transition-colors min-h-[44px]"
       >
         <ChevronLeft className="w-4 h-4" />
         Back to Dashboard

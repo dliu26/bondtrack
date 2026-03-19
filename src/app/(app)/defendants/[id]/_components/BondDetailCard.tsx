@@ -74,43 +74,45 @@ function CourtDateRow({
   }
 
   return (
-    <div className={clsx('flex items-start gap-3 py-3 border-b border-gray-100 last:border-0', pending && 'opacity-50')}>
-      <Calendar className="w-4 h-4 text-gray-400 mt-1 shrink-0" />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium text-gray-900">{fmt(cd.date)}{fmtTime(cd.time)}</span>
-          <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full', cfg.color)}>{cfg.label}</span>
-          {daysTo !== null && (
-            <span className={clsx(
-              'text-xs font-bold px-2 py-0.5 rounded-full',
-              daysTo <= 3 ? 'bg-red-100 text-red-700' : daysTo <= 14 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
-            )}>
-              {daysTo === 0 ? 'Today' : daysTo < 0 ? `${Math.abs(daysTo)}d ago` : `${daysTo}d away`}
-            </span>
-          )}
+    <div className={clsx('py-3 border-b border-gray-100 last:border-0', pending && 'opacity-50')}>
+      <div className="flex items-start gap-3">
+        <Calendar className="w-4 h-4 text-gray-400 mt-1 shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-medium text-gray-900">{fmt(cd.date)}{fmtTime(cd.time)}</span>
+            <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full', cfg.color)}>{cfg.label}</span>
+            {daysTo !== null && (
+              <span className={clsx(
+                'text-xs font-bold px-2 py-0.5 rounded-full',
+                daysTo <= 3 ? 'bg-red-100 text-red-700' : daysTo <= 14 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
+              )}>
+                {daysTo === 0 ? 'Today' : daysTo < 0 ? `${Math.abs(daysTo)}d ago` : `${daysTo}d away`}
+              </span>
+            )}
+          </div>
+          {cd.location && <p className="text-sm text-gray-500 mt-0.5">{cd.location}</p>}
         </div>
-        {cd.location && <p className="text-sm text-gray-500 mt-0.5">{cd.location}</p>}
       </div>
       {cd.status === 'upcoming' && (
-        <div className="flex gap-1.5 shrink-0">
+        <div className="flex gap-2 mt-2 ml-7">
           <button
             onClick={() => act('completed')}
             disabled={pending}
-            className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors min-h-[44px]"
           >
             Completed
           </button>
           <button
             onClick={() => act('missed')}
             disabled={pending}
-            className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors min-h-[44px]"
           >
             Missed
           </button>
           <button
             onClick={() => act('cancelled')}
             disabled={pending}
-            className="text-xs font-medium px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors min-h-[44px]"
           >
             Cancel
           </button>
@@ -208,7 +210,7 @@ function PaymentRow({ payment, defendantId }: { payment: Payment; defendantId: s
         <button
           onClick={handleMarkPaid}
           disabled={pending}
-          className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors disabled:opacity-50"
+          className="shrink-0 text-sm font-semibold px-4 py-2.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors disabled:opacity-50 min-h-[44px]"
         >
           Mark Paid
         </button>

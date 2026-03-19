@@ -16,7 +16,7 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendSMS } from '@/lib/sms'
-import { verifyCronRequest, unauthorizedResponse } from '@/lib/cron'
+import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { format, addDays, startOfDay, endOfDay } from 'date-fns'
 
 const ALERT_DAYS = [30, 14, 7]
@@ -24,6 +24,7 @@ const ALERT_DAYS = [30, 14, 7]
 export async function GET(request: Request) {
   if (!verifyCronRequest(request)) return unauthorizedResponse()
 
+  try {
   const supabase = await createServiceClient()
   const now = new Date()
   const bondsmanPhone = process.env.BONDSMAN_PHONE
@@ -82,6 +83,14 @@ export async function GET(request: Request) {
     alertsSent++
   }
 
-  console.log(`[FORFEITURE] ${alertsSent} forfeiture alerts sent`)
-  return Response.json({ ok: true, alertsSent })
+    console.log(`[FORFEITURE] ${alertsSent} forfeiture alerts sent`)
+    await logCron('forfeiture', 'success', `${alertsSent} forfeiture alerts sent`, alertsSent)
+
+    return Response.json({ ok: true, alertsSent })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[FORFEITURE] Fatal error:', message)
+    await logCron('forfeiture', 'failed', message)
+    return Response.json({ ok: false, error: message }, { status: 500 })
+  }
 }

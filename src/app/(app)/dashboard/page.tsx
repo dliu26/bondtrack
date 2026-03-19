@@ -163,13 +163,13 @@ export default async function DashboardPage() {
   const greenCount = processed.filter((b) => b.urgency === 'green').length
 
   return (
-    <div className="px-8 py-8 max-w-6xl">
+    <div className="px-4 py-4 md:px-8 md:py-8 max-w-6xl">
       {/* Page header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-start justify-between gap-3 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <div className="flex items-center gap-4 mt-1.5">
-            <span className="text-gray-500 text-base">{processed.length} active bonds</span>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex items-center flex-wrap gap-2 mt-1.5">
+            <span className="text-gray-500 text-sm md:text-base">{processed.length} active bonds</span>
             {redCount > 0 && (
               <span className="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded-full">
                 {redCount} need attention
@@ -189,10 +189,11 @@ export default async function DashboardPage() {
         </div>
         <Link
           href="/bonds/new"
-          className="flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-3 rounded-xl font-semibold text-base hover:bg-[#1a2f5a] transition-colors"
+          className="flex items-center gap-2 bg-[#0f1e3c] text-white px-4 py-3 md:px-5 rounded-xl font-semibold text-sm md:text-base hover:bg-[#1a2f5a] transition-colors shrink-0 min-h-[44px]"
         >
           <PlusCircle className="w-5 h-5" />
-          Add Bond
+          <span className="hidden sm:inline">Add Bond</span>
+          <span className="sm:hidden">Add</span>
         </Link>
       </div>
 
@@ -213,12 +214,12 @@ export default async function DashboardPage() {
 
 function EmptyDashboard() {
   return (
-    <div className="px-8 py-8 max-w-6xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+    <div className="px-4 py-4 md:px-8 md:py-8 max-w-6xl">
+      <div className="flex items-center justify-between mb-6 md:mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
         <Link
           href="/bonds/new"
-          className="flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-3 rounded-xl font-semibold text-base hover:bg-[#1a2f5a] transition-colors"
+          className="flex items-center gap-2 bg-[#0f1e3c] text-white px-4 py-3 md:px-5 rounded-xl font-semibold text-sm md:text-base hover:bg-[#1a2f5a] transition-colors min-h-[44px]"
         >
           <PlusCircle className="w-5 h-5" />
           Add Bond

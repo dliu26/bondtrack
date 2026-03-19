@@ -12,12 +12,13 @@
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendSMS } from '@/lib/sms'
-import { verifyCronRequest, unauthorizedResponse } from '@/lib/cron'
+import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { format, addDays, startOfDay, endOfDay } from 'date-fns'
 
 export async function GET(request: Request) {
   if (!verifyCronRequest(request)) return unauthorizedResponse()
 
+  try {
   const supabase = await createServiceClient()
   const now = new Date()
   const bondsmanName = process.env.BONDSMAN_NAME ?? 'your bondsman'
@@ -112,6 +113,15 @@ export async function GET(request: Request) {
     markedOverdue++
   }
 
-  console.log(`[PAYMENTS] ${remindersSent} 3-day reminders sent, ${markedOverdue} marked overdue`)
-  return Response.json({ ok: true, remindersSent, markedOverdue })
+    const msg = `${remindersSent} 3-day reminders sent, ${markedOverdue} marked overdue`
+    console.log(`[PAYMENTS] ${msg}`)
+    await logCron('payments', 'success', msg, remindersSent + markedOverdue)
+
+    return Response.json({ ok: true, remindersSent, markedOverdue })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[PAYMENTS] Fatal error:', message)
+    await logCron('payments', 'failed', message)
+    return Response.json({ ok: false, error: message }, { status: 500 })
+  }
 }
