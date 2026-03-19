@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/court-check",
+      "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/checkins?action=send",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/checkins?action=missed",
+      "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/payments",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/forfeiture",
+      "schedule": "0 8 * * *"
+    }
+  ]
+}

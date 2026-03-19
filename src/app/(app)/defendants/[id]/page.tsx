@@ -1,0 +1,113 @@
+import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
+import { ChevronLeft } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import DefendantInfoCard from './_components/DefendantInfoCard'
+import NotesEditor from './_components/NotesEditor'
+import BondDetailCard from './_components/BondDetailCard'
+import CheckinTable from './_components/CheckinTable'
+
+export const dynamic = 'force-dynamic'
+
+interface Props {
+  params: Promise<{ id: string }>
+}
+
+export default async function DefendantPage({ params }: Props) {
+  const { id } = await params
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  // ── Fetch defendant ───────────────────────────────────────────────────
+  const { data: defendant } = await supabase
+    .from('defendants')
+    .select('*')
+    .eq('id', id)
+    .eq('bondsman_id', user.id)
+    .single()
+
+  if (!defendant) notFound()
+
+  // ── Parallel fetch: bonds (with relations) + check-ins ────────────────
+  const [bondsRes, checkinsRes] = await Promise.all([
+    supabase
+      .from('bonds')
+      .select('*, cosigners(*), court_dates(*), payments(*)')
+      .eq('defendant_id', id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('checkins')
+      .select('*')
+      .eq('defendant_id', id)
+      .order('scheduled_at', { ascending: false })
+      .limit(50),
+  ])
+
+  const bonds = bondsRes.data ?? []
+  const checkins = checkinsRes.data ?? []
+
+  const activeBonds = bonds.filter((b) => b.status === 'active')
+  const inactiveBonds = bonds.filter((b) => b.status !== 'active')
+
+  return (
+    <div className="px-8 py-8 max-w-4xl">
+      {/* Back */}
+      <Link
+        href="/dashboard"
+        className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-6 transition-colors"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Back to Dashboard
+      </Link>
+
+      <div className="space-y-6">
+        {/* Defendant info (editable) */}
+        <DefendantInfoCard defendant={defendant} />
+
+        {/* Notes (auto-save) */}
+        <NotesEditor defendantId={id} initialNotes={defendant.notes} />
+
+        {/* Active bonds */}
+        {activeBonds.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-900">
+              Active Bond{activeBonds.length > 1 ? 's' : ''}
+            </h2>
+            {activeBonds.map((bond) => (
+              <BondDetailCard key={bond.id} bond={bond} defendantId={id} />
+            ))}
+          </div>
+        )}
+
+        {/* Inactive bonds */}
+        {inactiveBonds.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-gray-700">
+              Prior Bonds
+            </h2>
+            {inactiveBonds.map((bond) => (
+              <BondDetailCard key={bond.id} bond={bond} defendantId={id} />
+            ))}
+          </div>
+        )}
+
+        {bonds.length === 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
+            <p className="text-gray-400 text-lg">No bonds on record for this defendant.</p>
+            <Link
+              href="/bonds/new"
+              className="inline-block mt-4 text-[#0f1e3c] font-semibold hover:underline"
+            >
+              Add a bond →
+            </Link>
+          </div>
+        )}
+
+        {/* Check-in history */}
+        <CheckinTable checkins={checkins} />
+      </div>
+    </div>
+  )
+}
