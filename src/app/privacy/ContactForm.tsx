@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
@@ -8,14 +9,23 @@ export default function ContactForm() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    console.log('[ContactForm] Submitted:', form)
     setSubmitted(true)
   }
 
   if (submitted) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-xl px-6 py-5 text-green-800">
-        <p className="font-semibold text-lg">Message received</p>
-        <p className="text-sm mt-1">Thank you for reaching out. We'll get back to you shortly.</p>
+      <div className="space-y-4">
+        <div className="bg-green-50 border border-green-200 rounded-xl px-6 py-5 text-green-800">
+          <p className="font-semibold text-lg">Message received</p>
+          <p className="text-sm mt-1">Thank you for reaching out. We'll get back to you shortly.</p>
+        </div>
+        <Link
+          href="/"
+          className="inline-block bg-[#0f1e3c] text-white px-6 py-3 rounded-xl font-medium text-base hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75"
+        >
+          ← Back to Home
+        </Link>
       </div>
     )
   }

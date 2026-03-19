@@ -31,7 +31,7 @@ export default function Sidebar({ userEmail, unreadCount }: SidebarProps) {
   return (
     <aside className="hidden md:flex fixed inset-y-0 left-0 w-64 bg-[#0f1e3c] flex-col z-10">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
+      <Link href="/dashboard" className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
         <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white/10">
           <Shield className="w-5 h-5 text-white" />
         </div>
@@ -39,7 +39,7 @@ export default function Sidebar({ userEmail, unreadCount }: SidebarProps) {
           <p className="text-white font-bold text-lg leading-tight">BondTrack</p>
           <p className="text-white/50 text-xs">Texas Bail Bonds</p>
         </div>
-      </div>
+      </Link>
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-6 space-y-1">

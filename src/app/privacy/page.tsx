@@ -13,12 +13,14 @@ export default function PrivacyPage() {
         <Link href="/" className="text-white text-xl font-bold tracking-tight">
           BondTrack
         </Link>
-        <Link
-          href="/login"
-          className="text-white text-sm font-medium hover:text-gray-300 transition-colors"
-        >
-          Sign In
-        </Link>
+        <div className="flex items-center gap-5">
+          <Link href="/" className="text-white/70 text-sm font-medium hover:text-white transition-colors">
+            ← Back to Home
+          </Link>
+          <Link href="/login" className="text-white text-sm font-medium hover:text-gray-300 transition-colors">
+            Sign In
+          </Link>
+        </div>
       </nav>
 
       {/* Content */}

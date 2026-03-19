@@ -12,7 +12,7 @@ export default async function RootPage() {
     <div className="min-h-screen bg-white flex flex-col">
       {/* Nav */}
       <nav className="bg-[#0f1e3c] px-6 py-4 flex items-center justify-between">
-        <span className="text-white text-xl font-bold tracking-tight">BondTrack</span>
+        <Link href="/" className="text-white text-xl font-bold tracking-tight">BondTrack</Link>
         <Link
           href="/login"
           className="text-white text-sm font-medium hover:text-gray-300 transition-colors"
@@ -76,7 +76,7 @@ export default async function RootPage() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 px-6 py-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-gray-500">
-          <p>© 2026 BondTrack Software. All rights reserved.</p>
+          <Link href="/" className="hover:text-gray-800 transition-colors">© 2026 BondTrack Software. All rights reserved.</Link>
           <Link href="/privacy" className="hover:text-gray-800 transition-colors">
             Privacy Policy
           </Link>
