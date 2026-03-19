@@ -246,16 +246,16 @@ function EmptyDashboard({ closedCount }: { closedCount: number }) {
         </Link>
       </div>
       <div className="text-center py-24 bg-white rounded-2xl border border-gray-200">
-        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-5">
           <PlusCircle className="w-8 h-8 text-gray-400" />
         </div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">No active bonds</h2>
-        <p className="text-gray-500 text-lg mb-6">Add your first bond to start tracking your portfolio.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">Welcome to BondTrack</h2>
+        <p className="text-gray-500 text-lg mb-8 max-w-sm mx-auto">Add your first bond to get started. It only takes a few minutes.</p>
         <Link
           href="/bonds/new"
-          className="inline-flex items-center gap-2 bg-[#0f1e3c] text-white px-6 py-3 rounded-xl font-semibold text-lg hover:bg-[#1a2f5a] transition-colors"
+          className="inline-flex items-center gap-2 bg-[#0f1e3c] text-white px-8 py-4 rounded-xl font-bold text-xl hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75"
         >
-          <PlusCircle className="w-5 h-5" />
+          <PlusCircle className="w-6 h-6" />
           Add Your First Bond
         </Link>
       </div>

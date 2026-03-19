@@ -57,9 +57,19 @@ export default function HistoryList({ bonds }: { bonds: ClosedBond[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-gray-400 text-center py-12">
-          {query ? 'No bonds match that name.' : 'No closed bonds yet.'}
-        </p>
+        <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
+          {query ? (
+            <>
+              <p className="text-xl font-semibold text-gray-500">No bonds match that name.</p>
+              <p className="text-gray-400 mt-2">Try a different spelling or clear the search.</p>
+            </>
+          ) : (
+            <>
+              <p className="text-xl font-semibold text-gray-500">No closed bonds yet.</p>
+              <p className="text-gray-400 mt-2">Bonds you mark as exonerated, forfeited, or closed will appear here.</p>
+            </>
+          )}
+        </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filtered.map((bond) => {

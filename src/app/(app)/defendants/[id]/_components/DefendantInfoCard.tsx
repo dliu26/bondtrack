@@ -5,6 +5,7 @@ import { Pencil, Check, X } from 'lucide-react'
 import clsx from 'clsx'
 import { updateDefendant } from '../actions'
 import { validatePhone, validateDob } from '@/lib/validation'
+import { toast } from '@/lib/toast'
 import type { Defendant } from '@/types/database'
 
 function Field({ label, value }: { label: string; value: string | null }) {
@@ -94,6 +95,7 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
       if (result?.error) {
         setError(result.error)
       } else {
+        toast('Defendant info saved.', 'success')
         setEditing(false)
       }
     })

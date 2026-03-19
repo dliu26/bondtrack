@@ -40,9 +40,13 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-            {mode === 'signin' ? 'Sign in to your account' : 'Create your account'}
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            {mode === 'signin' ? 'Sign in to your account' : 'Create your free account'}
           </h2>
+          {mode === 'signup' && (
+            <p className="text-base text-gray-500 mb-6">No credit card required. Takes 30 seconds.</p>
+          )}
+          {mode === 'signin' && <div className="mb-6" />}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -90,7 +94,7 @@ export default function LoginPage() {
                 ? 'Please wait…'
                 : mode === 'signin'
                 ? 'Sign In'
-                : 'Create Account'}
+                : 'Create Free Account'}
             </button>
           </form>
 

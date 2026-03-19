@@ -73,6 +73,35 @@ export default async function RootPage() {
         </div>
       </section>
 
+      {/* How It Works */}
+      <section className="px-6 py-16 bg-white border-t border-gray-100">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-12">How It Works</h2>
+          <div className="space-y-8">
+            {[
+              { n: '1', text: 'Add your bonds in minutes' },
+              { n: '2', text: 'BondTrack monitors court dates and check-ins automatically' },
+              { n: '3', text: 'Get alerted before anything slips through' },
+            ].map(({ n, text }) => (
+              <div key={n} className="flex items-center gap-6">
+                <div className="w-12 h-12 rounded-full bg-[#0f1e3c] text-white font-bold text-xl flex items-center justify-center shrink-0">
+                  {n}
+                </div>
+                <p className="text-xl text-gray-700 leading-snug">{text}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Link
+              href="/login"
+              className="inline-block bg-[#0f1e3c] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75"
+            >
+              Get Started Free
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 px-6 py-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-gray-500">

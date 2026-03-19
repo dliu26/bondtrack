@@ -420,7 +420,7 @@ function StepBond({
           <Label required>Bond Amount</Label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input type="number" value={form.bondAmount} onChange={(v) => setForm({ ...form, bondAmount: v })} placeholder="50000" className={clsx('pl-8', errors.bondAmount && 'border-red-400')} />
+            <Input type="number" value={form.bondAmount} onChange={(v) => setForm({ ...form, bondAmount: v })} placeholder="25000" className={clsx('pl-8', errors.bondAmount && 'border-red-400')} />
           </div>
           <FieldError message={errors.bondAmount} />
         </Field>
@@ -428,7 +428,7 @@ function StepBond({
           <Label required>Premium Owed</Label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input type="number" value={form.premiumOwed} onChange={(v) => setForm({ ...form, premiumOwed: v })} placeholder="5000" className={clsx('pl-8', errors.premiumOwed && 'border-red-400')} />
+            <Input type="number" value={form.premiumOwed} onChange={(v) => setForm({ ...form, premiumOwed: v })} placeholder="2500" className={clsx('pl-8', errors.premiumOwed && 'border-red-400')} />
           </div>
           <FieldError message={errors.premiumOwed} />
         </Field>
@@ -452,12 +452,12 @@ function StepBond({
       <FieldRow>
         <Field>
           <Label>Case Number</Label>
-          <Input value={form.caseNumber} onChange={(v) => setForm({ ...form, caseNumber: v })} placeholder="2024-CR-001234" className={errors.caseNumber ? 'border-red-400' : ''} />
+          <Input value={form.caseNumber} onChange={(v) => setForm({ ...form, caseNumber: v })} placeholder="CR-2026-00123" className={errors.caseNumber ? 'border-red-400' : ''} />
           <FieldError message={errors.caseNumber} />
         </Field>
         <Field>
           <Label>County</Label>
-          <Input value={form.county} onChange={(v) => setForm({ ...form, county: v })} placeholder="Collin" />
+          <Input value={form.county} onChange={(v) => setForm({ ...form, county: v })} placeholder="Collin County" />
         </Field>
       </FieldRow>
 

@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { PlusCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import Sidebar from '@/components/Sidebar'
 import BottomNav from '@/components/BottomNav'
@@ -23,6 +25,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         {children}
       </main>
       <BottomNav unreadCount={count ?? 0} />
+      {/* Floating Add Bond button — mobile only, above bottom nav */}
+      <Link
+        href="/bonds/new"
+        className="md:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-3.5 rounded-2xl font-bold text-base shadow-lg hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75 min-h-[52px]"
+      >
+        <PlusCircle className="w-5 h-5" />
+        Add Bond
+      </Link>
       <Toaster />
     </div>
   )

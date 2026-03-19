@@ -119,6 +119,8 @@ function CourtDateRow({
     if (result?.error) {
       setStatus(prev)
       toast(result.error, 'error')
+    } else {
+      toast('Court date updated.', 'success')
     }
   }
 
@@ -186,6 +188,7 @@ function AddCourtDateForm({ bondId, defendantId, onDone }: { bondId: string; def
     const result = await addCourtDate(bondId, defendantId, { date, time, location })
     setBusy(false)
     if (result?.error) { setError(result.error); return }
+    toast('Court date added.', 'success')
     onDone()
   }
 
@@ -250,6 +253,8 @@ function PaymentRow({ payment, defendantId }: { payment: Payment; defendantId: s
     if (result?.error) {
       setStatus(prev)
       toast(result.error, 'error')
+    } else {
+      toast('Payment marked as paid.', 'success')
     }
   }
 
@@ -341,6 +346,8 @@ export default function BondDetailCard({
     if (result?.error) {
       setBondStatus(prev)
       toast(result.error, 'error')
+    } else {
+      toast('Bond status updated.', 'success')
     }
   }
 

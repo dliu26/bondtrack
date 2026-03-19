@@ -85,9 +85,9 @@ export default function NotificationsList({
       {/* List */}
       {notifications.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-16 text-center">
-          <CheckCheck className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-xl font-semibold text-gray-500">All caught up</p>
-          <p className="text-gray-400 mt-1">No notifications yet.</p>
+          <CheckCheck className="w-12 h-12 text-green-300 mx-auto mb-4" />
+          <p className="text-2xl font-bold text-gray-700">You're all caught up.</p>
+          <p className="text-gray-400 mt-2 text-lg">No notifications right now. Check back after your next court date or check-in.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm divide-y divide-gray-100 overflow-hidden">

@@ -35,7 +35,7 @@ export default function BottomNav({ unreadCount }: { unreadCount: number }) {
                 </span>
               )}
             </div>
-            <span className="text-[11px] mt-1 font-medium">{label}</span>
+            <span className="text-xs mt-1 font-semibold">{label}</span>
             {isActive && (
               <span className="absolute top-0 inset-x-4 h-0.5 bg-white rounded-full" />
             )}
