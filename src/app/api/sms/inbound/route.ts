@@ -11,7 +11,11 @@
  */
 
 import { createServiceClient } from '@/lib/supabase/server'
-import { normalizePhone } from '@/lib/sms'
+
+function normalizePhone(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  return digits.length === 11 && digits.startsWith('1') ? digits.slice(1) : digits
+}
 
 function twiml(message: string): Response {
   return new Response(

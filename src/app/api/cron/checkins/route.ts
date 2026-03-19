@@ -5,7 +5,7 @@
  *
  *   action=send   (9 AM daily)
  *     — Find defendants whose check-in is due today.
- *     — Insert a pending checkin record and send SMS.
+ *     — Insert a pending checkin record.
  *
  *   action=missed  (1 PM daily)
  *     — Find check-ins sent 4+ hours ago that are still pending.
@@ -15,7 +15,6 @@
  */
 
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSMS } from '@/lib/sms'
 import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { subDays, subHours, startOfDay, endOfDay } from 'date-fns'
 
@@ -37,13 +36,12 @@ async function sendCheckIns() {
 
   const { data: defendants } = await supabase
     .from('defendants')
-    .select('id, first_name, phone, checkin_frequency, last_checkin_at, bondsman_id')
+    .select('id, first_name, checkin_frequency, last_checkin_at, bondsman_id')
     .in('id', activeDefendantIds)
 
   let sent = 0
 
   for (const def of defendants ?? []) {
-    if (!def.phone) continue
     if (def.checkin_frequency === 'custom') continue // manual only
 
     // Check if a check-in was already scheduled today
@@ -71,15 +69,10 @@ async function sendCheckIns() {
       status: 'pending',
     })
 
-    await sendSMS(
-      def.phone,
-      `Hi ${def.first_name}, please confirm your check-in by replying YES.`
-    )
-
     sent++
   }
 
-  console.log(`[CHECKINS-SEND] Sent ${sent} check-in messages`)
+  console.log(`[CHECKINS-SEND] Scheduled ${sent} check-ins`)
   return { sent }
 }
 
@@ -120,7 +113,7 @@ async function markMissedCheckIns() {
     await supabase.from('notifications').insert({
       bondsman_id: def.bondsman_id,
       bond_id: bond?.id ?? null,
-      message: `${def.first_name} did not respond to their check-in.`,
+      message: `${def.first_name} has not responded to their check-in`,
       type: 'checkin_missed',
     })
 
@@ -153,7 +146,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await sendCheckIns()
-    await logCron('checkins_send', 'success', `Sent ${result.sent} check-in messages`, result.sent)
+    await logCron('checkins_send', 'success', `Scheduled ${result.sent} check-ins`, result.sent)
     return Response.json({ ok: true, ...result })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

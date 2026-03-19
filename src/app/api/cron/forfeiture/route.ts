@@ -4,18 +4,15 @@
  * Runs daily at 8 AM via Vercel Cron.
  *
  * For every active bond with a forfeiture_deadline set:
- *   — At 30, 14, and 7 days remaining: SMS alert to bondsman + notification.
+ *   — At 30, 14, and 7 days remaining: create bondsman notification.
  *   — Avoids duplicate alerts by checking whether a forfeiture_warning
  *     notification for this bond was already created today.
  *
  * The forfeiture_deadline is set automatically when a court date is
  * marked as missed (see defendants/[id]/actions.ts → updateCourtDateStatus).
- *
- * BONDSMAN_PHONE env var: set this to your phone number to receive SMS alerts.
  */
 
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSMS } from '@/lib/sms'
 import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { format, addDays, startOfDay, endOfDay } from 'date-fns'
 
@@ -27,7 +24,6 @@ export async function GET(request: Request) {
   try {
   const supabase = await createServiceClient()
   const now = new Date()
-  const bondsmanPhone = process.env.BONDSMAN_PHONE
 
   // Build the set of deadline dates we alert on today
   const alertDates = ALERT_DAYS.map((d) => format(addDays(now, d), 'yyyy-MM-dd'))
@@ -58,13 +54,12 @@ export async function GET(request: Request) {
     const defRaw = Array.isArray(bond.defendants) ? bond.defendants[0] : bond.defendants
     const defendant = defRaw as { first_name: string; last_name: string } | null
     const defName = defendant ? `${defendant.first_name} ${defendant.last_name}` : 'Unknown Defendant'
-    const deadline = format(new Date(bond.forfeiture_deadline!), 'MMMM d, yyyy')
 
     // Calculate exact days remaining
-    const daysLeft = alertDates.indexOf(bond.forfeiture_deadline!)
-    const daysRemaining = ALERT_DAYS[daysLeft]
+    const daysIdx = alertDates.indexOf(bond.forfeiture_deadline!)
+    const daysRemaining = ALERT_DAYS[daysIdx]
 
-    const message = `URGENT: Forfeiture deadline for ${defName} is in ${daysRemaining} days (${deadline}). Immediate action required to avoid bond forfeiture.`
+    const message = `${defName} forfeiture deadline in ${daysRemaining} days — take action immediately`
 
     await supabase.from('notifications').insert({
       bondsman_id: bond.bondsman_id,
@@ -72,13 +67,6 @@ export async function GET(request: Request) {
       message,
       type: 'forfeiture_warning',
     })
-
-    if (bondsmanPhone) {
-      await sendSMS(bondsmanPhone, `[BondTrack] ${message}`)
-    } else {
-      console.warn('[FORFEITURE] BONDSMAN_PHONE not set — SMS not sent. Set it in env vars.')
-      console.log(`[FORFEITURE ALERT] ${message}`)
-    }
 
     alertsSent++
   }

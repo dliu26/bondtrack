@@ -5,8 +5,8 @@
  * For every active Collin County bond with a case number:
  *   1. Scrapes the public case portal for current hearing dates.
  *   2. Compares against stored court_dates — new or changed dates trigger a
- *      notification + SMS to the bondsman.
- *   3. Sends 14-day and 3-day reminder SMS to the defendant.
+ *      notification for the bondsman.
+ *   3. Sends 14-day and 3-day in-app reminders to the bondsman.
  *
  * COURT PORTAL SETUP:
  *   Set COLLIN_COUNTY_COURT_URL in your environment to the public case search
@@ -18,7 +18,6 @@
  */
 
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSMS } from '@/lib/sms'
 import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { format, addDays, parseISO, differenceInDays } from 'date-fns'
 import { parse as parseHtml } from 'node-html-parser'
@@ -100,30 +99,41 @@ export async function GET(request: Request) {
     // ── 1. Court date reminders (14-day + 3-day) ─────────────────────────────
     const { data: reminderDates } = await supabase
       .from('court_dates')
-      .select('*, bonds!inner(defendant_id, defendants(first_name, phone))')
+      .select('*, bonds!inner(id, bondsman_id, defendant_id, defendants(first_name, last_name))')
       .eq('status', 'upcoming')
       .in('date', [in14, in3])
 
     let reminders14 = 0, reminders3 = 0
 
     for (const cd of reminderDates ?? []) {
-      const bond = cd.bonds as { defendant_id: string; defendants: { first_name: string; phone: string | null } | null }
-      const defendant = bond?.defendants
-      if (!defendant?.phone) continue
+      const bond = cd.bonds as {
+        id: string
+        bondsman_id: string
+        defendant_id: string
+        defendants: { first_name: string; last_name: string } | null
+      }
+      if (!bond?.bondsman_id) continue
 
       const daysOut = cd.date === in14 ? 14 : 3
       const flag = daysOut === 14 ? 'reminder_sent_14d' : 'reminder_sent_3d'
       const alreadySent = daysOut === 14 ? cd.reminder_sent_14d : cd.reminder_sent_3d
       if (alreadySent) continue
 
-      const dateStr = format(parseISO(cd.date), 'MMMM d, yyyy')
-      const timeStr = cd.time ? ` at ${cd.time}` : ''
-      const locStr  = cd.location ? ` at ${cd.location}` : ''
+      const defRaw = bond.defendants
+      const def = (Array.isArray(defRaw) ? defRaw[0] : defRaw) as { first_name: string; last_name: string } | null
+      const defName = def ? `${def.first_name} ${def.last_name}` : 'Your defendant'
+      const locStr = cd.location ? ` at ${cd.location}` : ''
 
-      await sendSMS(
-        defendant.phone,
-        `Reminder: You have a court date on ${dateStr}${timeStr}${locStr}. Reply CONFIRM to acknowledge.`
-      )
+      const message = daysOut === 14
+        ? `${defName} has a court date in 14 days${locStr}`
+        : `${defName} has a court date in 3 days${locStr} — confirm they are ready`
+
+      await supabase.from('notifications').insert({
+        bondsman_id: bond.bondsman_id,
+        bond_id: bond.id,
+        message,
+        type: 'court_change',
+      })
 
       await supabase
         .from('court_dates')
@@ -170,9 +180,6 @@ export async function GET(request: Request) {
           message,
           type: 'court_change',
         })
-
-        const bondsmanPhone = process.env.BONDSMAN_PHONE
-        if (bondsmanPhone) await sendSMS(bondsmanPhone, `[BondTrack] ${message}`)
 
         changesDetected++
       }

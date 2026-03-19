@@ -4,16 +4,15 @@
  * Runs daily at 8 AM via Vercel Cron.
  *
  *   1. Upcoming payments due in exactly 3 days
- *      → SMS reminder to co-signer(s) on the bond.
+ *      → Bondsman notification.
  *
  *   2. Payments where due_date has passed and status is still 'upcoming'
  *      → Mark as 'overdue' + create bondsman notification.
  */
 
 import { createServiceClient } from '@/lib/supabase/server'
-import { sendSMS } from '@/lib/sms'
 import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
-import { format, addDays, startOfDay, endOfDay } from 'date-fns'
+import { format, addDays, differenceInCalendarDays, startOfDay, endOfDay } from 'date-fns'
 
 export async function GET(request: Request) {
   if (!verifyCronRequest(request)) return unauthorizedResponse()
@@ -21,7 +20,6 @@ export async function GET(request: Request) {
   try {
   const supabase = await createServiceClient()
   const now = new Date()
-  const bondsmanName = process.env.BONDSMAN_NAME ?? 'your bondsman'
 
   // ── 1. 3-day reminders ────────────────────────────────────────────────────
   const in3Start = startOfDay(addDays(now, 3)).toISOString().split('T')[0]
@@ -33,8 +31,7 @@ export async function GET(request: Request) {
       id, amount_due, due_date,
       bonds!inner(
         id, bondsman_id,
-        defendants!inner(first_name, last_name),
-        cosigners(first_name, last_name, phone)
+        defendants!inner(first_name, last_name)
       )
     `)
     .eq('status', 'upcoming')
@@ -49,24 +46,21 @@ export async function GET(request: Request) {
       id: string
       bondsman_id: string
       defendants: { first_name: string; last_name: string } | Array<{ first_name: string; last_name: string }>
-      cosigners: Array<{ first_name: string; last_name: string; phone: string | null }>
     }
     if (!bond) continue
     const defRaw = Array.isArray(bond.defendants) ? bond.defendants[0] : bond.defendants
     const def = defRaw as { first_name: string; last_name: string } | null
     if (!def) continue
     const defName = `${def.first_name} ${def.last_name}`
-    const dueDateStr = format(new Date(payment.due_date), 'MMMM d, yyyy')
-    const amountStr  = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(payment.amount_due)
+    const amountStr = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(payment.amount_due)
 
-    for (const cosigner of bond.cosigners) {
-      if (!cosigner.phone) continue
-      await sendSMS(
-        cosigner.phone,
-        `Reminder: A payment of ${amountStr} is due on ${dueDateStr} for ${defName}'s bond. Please contact ${bondsmanName} to arrange payment.`
-      )
-      remindersSent++
-    }
+    await supabase.from('notifications').insert({
+      bondsman_id: bond.bondsman_id,
+      bond_id: bond.id,
+      message: `${defName} has a payment of ${amountStr} due in 3 days`,
+      type: 'payment_overdue',
+    })
+    remindersSent++
   }
 
   // ── 2. Mark overdue ────────────────────────────────────────────────────────
@@ -101,19 +95,19 @@ export async function GET(request: Request) {
     if (!def2) continue
     const defName = `${def2.first_name} ${def2.last_name}`
     const amountStr = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(payment.amount_due)
-    const dueDateStr = format(new Date(payment.due_date), 'MMMM d, yyyy')
+    const daysOverdue = differenceInCalendarDays(now, new Date(payment.due_date))
 
     await supabase.from('notifications').insert({
       bondsman_id: bond.bondsman_id,
       bond_id: bond.id,
-      message: `Payment of ${amountStr} for ${defName} was due on ${dueDateStr} and is now overdue.`,
+      message: `${defName} co-signer payment of ${amountStr} is ${daysOverdue} day${daysOverdue === 1 ? '' : 's'} overdue`,
       type: 'payment_overdue',
     })
 
     markedOverdue++
   }
 
-    const msg = `${remindersSent} 3-day reminders sent, ${markedOverdue} marked overdue`
+    const msg = `${remindersSent} 3-day reminders, ${markedOverdue} marked overdue`
     console.log(`[PAYMENTS] ${msg}`)
     await logCron('payments', 'success', msg, remindersSent + markedOverdue)
 
