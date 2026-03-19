@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
 import { PlusCircle, Calendar, CreditCard, User, Clock, Check } from 'lucide-react'
 import clsx from 'clsx'
@@ -10,7 +10,8 @@ import {
   markPaymentPaid,
   updateBondStatus,
 } from '../actions'
-import type { Bond, CourtDate, Payment, Cosigner, BondStatus } from '@/types/database'
+import { toast } from '@/lib/toast'
+import type { Bond, CourtDate, Payment, Cosigner, BondStatus, CourtDateStatus } from '@/types/database'
 import { getDaysToDate, getDaysOverdue } from '@/lib/urgency'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -37,7 +38,7 @@ const bondStatusConfig: Record<BondStatus, { label: string; color: string }> = {
   closed:     { label: 'Closed',     color: 'bg-gray-100 text-gray-700' },
 }
 
-const courtStatusConfig = {
+const courtStatusConfig: Record<CourtDateStatus, { label: string; color: string }> = {
   upcoming:  { label: 'Upcoming',  color: 'bg-blue-100 text-blue-700' },
   completed: { label: 'Completed', color: 'bg-green-100 text-green-700' },
   missed:    { label: 'Missed',    color: 'bg-red-100 text-red-700' },
@@ -48,6 +49,33 @@ const paymentStatusConfig = {
   upcoming: { label: 'Upcoming', color: 'bg-blue-100 text-blue-700' },
   paid:     { label: 'Paid',     color: 'bg-green-100 text-green-700' },
   overdue:  { label: 'Overdue',  color: 'bg-red-100 text-red-700' },
+}
+
+// ── Action button ─────────────────────────────────────────────────────────────
+
+function ActionButton({
+  onClick,
+  disabled,
+  className,
+  children,
+}: {
+  onClick: () => void
+  disabled: boolean
+  className: string
+  children: React.ReactNode
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={clsx(
+        className,
+        'active:scale-95 transition-transform duration-75 disabled:opacity-40 disabled:cursor-not-allowed'
+      )}
+    >
+      {children}
+    </button>
+  )
 }
 
 // ── Court date row ────────────────────────────────────────────────────────────
@@ -61,20 +89,32 @@ function CourtDateRow({
   bondId: string
   defendantId: string
 }) {
-  const [pending, startAction] = useTransition()
-  const cfg = courtStatusConfig[cd.status]
-  const daysTo = cd.status === 'upcoming' ? getDaysToDate(cd.date) : null
+  const [status, setStatus] = useState<CourtDateStatus>(cd.status)
+  const [busy, setBusy] = useState(false)
 
-  function act(newStatus: CourtDate['status']) {
-    const label = newStatus === 'missed' ? 'Mark this court date as MISSED? This will set a 90-day forfeiture deadline.' : `Mark as ${newStatus}?`
+  const cfg = courtStatusConfig[status]
+  const daysTo = status === 'upcoming' ? getDaysToDate(cd.date) : null
+
+  async function act(newStatus: CourtDateStatus) {
+    const label =
+      newStatus === 'missed'
+        ? 'Mark this court date as MISSED? This will set a 90-day forfeiture deadline.'
+        : `Mark as ${newStatus}?`
     if (!confirm(label)) return
-    startAction(async () => {
-      await updateCourtDateStatus(cd.id, newStatus, bondId, cd.date, defendantId)
-    })
+
+    const prev = status
+    setStatus(newStatus)
+    setBusy(true)
+    const result = await updateCourtDateStatus(cd.id, newStatus, bondId, cd.date, defendantId)
+    setBusy(false)
+    if (result?.error) {
+      setStatus(prev)
+      toast(result.error, 'error')
+    }
   }
 
   return (
-    <div className={clsx('py-3 border-b border-gray-100 last:border-0', pending && 'opacity-50')}>
+    <div className="py-3 border-b border-gray-100 last:border-0">
       <div className="flex items-start gap-3">
         <Calendar className="w-4 h-4 text-gray-400 mt-1 shrink-0" />
         <div className="flex-1 min-w-0">
@@ -93,29 +133,29 @@ function CourtDateRow({
           {cd.location && <p className="text-sm text-gray-500 mt-0.5">{cd.location}</p>}
         </div>
       </div>
-      {cd.status === 'upcoming' && (
+      {status === 'upcoming' && (
         <div className="flex gap-2 mt-2 ml-7">
-          <button
+          <ActionButton
             onClick={() => act('completed')}
-            disabled={pending}
-            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors min-h-[44px]"
+            disabled={busy}
+            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 min-h-[44px]"
           >
             Completed
-          </button>
-          <button
+          </ActionButton>
+          <ActionButton
             onClick={() => act('missed')}
-            disabled={pending}
-            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors min-h-[44px]"
+            disabled={busy}
+            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 min-h-[44px]"
           >
             Missed
-          </button>
-          <button
+          </ActionButton>
+          <ActionButton
             onClick={() => act('cancelled')}
-            disabled={pending}
-            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors min-h-[44px]"
+            disabled={busy}
+            className="flex-1 text-sm font-medium py-2.5 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 min-h-[44px]"
           >
             Cancel
-          </button>
+          </ActionButton>
         </div>
       )}
     </div>
@@ -128,16 +168,16 @@ function AddCourtDateForm({ bondId, defendantId, onDone }: { bondId: string; def
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [location, setLocation] = useState('')
-  const [saving, startSave] = useTransition()
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  function handleSave() {
+  async function handleSave() {
     if (!date) { setError('Date is required.'); return }
-    startSave(async () => {
-      const result = await addCourtDate(bondId, defendantId, { date, time, location })
-      if (result?.error) { setError(result.error); return }
-      onDone()
-    })
+    setBusy(true)
+    const result = await addCourtDate(bondId, defendantId, { date, time, location })
+    setBusy(false)
+    if (result?.error) { setError(result.error); return }
+    onDone()
   }
 
   return (
@@ -163,12 +203,18 @@ function AddCourtDateForm({ bondId, defendantId, onDone }: { bondId: string; def
       </div>
       {error && <p className="text-red-600 text-xs">{error}</p>}
       <div className="flex gap-2">
-        <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-1.5 bg-[#0f1e3c] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#1a2f5a] transition-colors disabled:opacity-60">
+        <ActionButton
+          onClick={handleSave}
+          disabled={busy}
+          className="flex items-center gap-1.5 bg-[#0f1e3c] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#1a2f5a]"
+        >
           <Check className="w-3.5 h-3.5" />
-          {saving ? 'Saving…' : 'Save Date'}
-        </button>
-        <button onClick={onDone} className="text-sm font-medium text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+          {busy ? 'Saving…' : 'Save Date'}
+        </ActionButton>
+        <button
+          onClick={onDone}
+          className="text-sm font-medium text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors active:scale-95 duration-75"
+        >
           Cancel
         </button>
       </div>
@@ -179,19 +225,27 @@ function AddCourtDateForm({ bondId, defendantId, onDone }: { bondId: string; def
 // ── Payment row ───────────────────────────────────────────────────────────────
 
 function PaymentRow({ payment, defendantId }: { payment: Payment; defendantId: string }) {
-  const [pending, startAction] = useTransition()
-  const cfg = paymentStatusConfig[payment.status]
-  const daysOverdue = payment.status === 'overdue' ? getDaysOverdue(payment.due_date) : null
+  const [status, setStatus] = useState(payment.status)
+  const [busy, setBusy] = useState(false)
 
-  function handleMarkPaid() {
+  const cfg = paymentStatusConfig[status]
+  const daysOverdue = status === 'overdue' ? getDaysOverdue(payment.due_date) : null
+
+  async function handleMarkPaid() {
     if (!confirm(`Mark $${payment.amount_due.toLocaleString()} as fully paid?`)) return
-    startAction(async () => {
-      await markPaymentPaid(payment.id, payment.amount_due, defendantId)
-    })
+    const prev = status
+    setStatus('paid')
+    setBusy(true)
+    const result = await markPaymentPaid(payment.id, payment.amount_due, defendantId)
+    setBusy(false)
+    if (result?.error) {
+      setStatus(prev)
+      toast(result.error, 'error')
+    }
   }
 
   return (
-    <div className={clsx('flex items-center gap-3 py-3 border-b border-gray-100 last:border-0', pending && 'opacity-50')}>
+    <div className="flex items-center gap-3 py-3 border-b border-gray-100 last:border-0">
       <CreditCard className="w-4 h-4 text-gray-400 shrink-0" />
       <div className="flex-1">
         <div className="flex items-center gap-2 flex-wrap">
@@ -206,14 +260,14 @@ function PaymentRow({ payment, defendantId }: { payment: Payment; defendantId: s
           <p className="text-xs text-gray-400 mt-0.5">Paid {fmt(payment.paid_at)}</p>
         )}
       </div>
-      {payment.status !== 'paid' && (
-        <button
+      {status !== 'paid' && (
+        <ActionButton
           onClick={handleMarkPaid}
-          disabled={pending}
-          className="shrink-0 text-sm font-semibold px-4 py-2.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors disabled:opacity-50 min-h-[44px]"
+          disabled={busy}
+          className="shrink-0 text-sm font-semibold px-4 py-2.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 min-h-[44px]"
         >
           Mark Paid
-        </button>
+        </ActionButton>
       )}
     </div>
   )
@@ -235,9 +289,10 @@ export default function BondDetailCard({
   defendantId: string
 }) {
   const [addingDate, setAddingDate] = useState(false)
-  const [changingStatus, startStatusChange] = useTransition()
+  const [bondStatus, setBondStatus] = useState<BondStatus>(bond.status)
+  const [busyStatus, setBusyStatus] = useState(false)
 
-  const scfg = bondStatusConfig[bond.status]
+  const scfg = bondStatusConfig[bondStatus]
   const sortedCourtDates = [...bond.court_dates].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
@@ -245,12 +300,18 @@ export default function BondDetailCard({
     (a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
   )
 
-  function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  async function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newStatus = e.target.value as BondStatus
     if (!confirm(`Change bond status to "${newStatus}"?`)) return
-    startStatusChange(async () => {
-      await updateBondStatus(bond.id, newStatus, defendantId)
-    })
+    const prev = bondStatus
+    setBondStatus(newStatus)
+    setBusyStatus(true)
+    const result = await updateBondStatus(bond.id, newStatus, defendantId)
+    setBusyStatus(false)
+    if (result?.error) {
+      setBondStatus(prev)
+      toast(result.error, 'error')
+    }
   }
 
   const premiumRemaining = bond.premium_owed - bond.premium_paid
@@ -276,7 +337,6 @@ export default function BondDetailCard({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Premium summary */}
             <div className="text-right text-sm">
               <p className="text-gray-500">Premium owed</p>
               <p className="font-semibold text-gray-900">{currency(bond.premium_owed)}</p>
@@ -284,12 +344,11 @@ export default function BondDetailCard({
                 <p className="text-red-600 font-medium">{currency(premiumRemaining)} remaining</p>
               )}
             </div>
-            {/* Status selector */}
             <select
-              value={bond.status}
+              value={bondStatus}
               onChange={handleStatusChange}
-              disabled={changingStatus}
-              className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] bg-white"
+              disabled={busyStatus}
+              className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] bg-white disabled:opacity-60 transition-opacity"
             >
               <option value="active">Active</option>
               <option value="forfeited">Forfeited</option>
@@ -331,7 +390,7 @@ export default function BondDetailCard({
             </h3>
             <button
               onClick={() => setAddingDate(!addingDate)}
-              className="flex items-center gap-1.5 text-sm font-medium text-[#0f1e3c] hover:underline"
+              className="flex items-center gap-1.5 text-sm font-medium text-[#0f1e3c] hover:underline active:scale-95 transition-transform duration-75"
             >
               <PlusCircle className="w-4 h-4" />
               Add Date

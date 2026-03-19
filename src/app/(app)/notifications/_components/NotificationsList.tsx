@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { Calendar, AlertCircle, CreditCard, AlertTriangle, CheckCheck } from 'lucide-react'
 import clsx from 'clsx'
 import { markAsRead, markAllRead } from '../actions'
+import { toast } from '@/lib/toast'
 import type { NotificationType } from '@/types/database'
 
 interface NotificationRow {
@@ -34,29 +35,26 @@ export default function NotificationsList({
 }) {
   const router = useRouter()
   const [notifications, setNotifications] = useState(initialNotifications)
-  const [markingAll, startMarkAll] = useTransition()
+  const [busyAll, setBusyAll] = useState(false)
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
-  function optimisticallyMarkRead(id: string) {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    )
-  }
-
   function handleClick(n: NotificationRow) {
-    optimisticallyMarkRead(n.id)
-    markAsRead(n.id) // fire-and-forget; server revalidates layout
-    if (n.defendant_id) {
-      router.push(`/defendants/${n.defendant_id}`)
-    }
+    setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))
+    markAsRead(n.id) // fire-and-forget; server revalidates layout badge
+    if (n.defendant_id) router.push(`/defendants/${n.defendant_id}`)
   }
 
-  function handleMarkAll() {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    startMarkAll(async () => {
-      await markAllRead()
-    })
+  async function handleMarkAll() {
+    const prev = notifications
+    setNotifications((p) => p.map((n) => ({ ...n, read: true })))
+    setBusyAll(true)
+    const result = await markAllRead()
+    setBusyAll(false)
+    if (result?.error) {
+      setNotifications(prev)
+      toast(result.error, 'error')
+    }
   }
 
   return (
@@ -74,12 +72,12 @@ export default function NotificationsList({
         {unreadCount > 0 && (
           <button
             onClick={handleMarkAll}
-            disabled={markingAll}
-            className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-600 border border-gray-300 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-60 min-h-[44px] shrink-0"
+            disabled={busyAll}
+            className="flex items-center gap-2 text-sm md:text-base font-medium text-gray-600 border border-gray-300 px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors active:scale-95 duration-75 disabled:opacity-40 min-h-[44px] shrink-0"
           >
             <CheckCheck className="w-4 h-4" />
-            <span className="hidden sm:inline">{markingAll ? 'Marking…' : 'Mark All Read'}</span>
-            <span className="sm:hidden">{markingAll ? '…' : 'Mark All'}</span>
+            <span className="hidden sm:inline">Mark All Read</span>
+            <span className="sm:hidden">Mark All</span>
           </button>
         )}
       </div>

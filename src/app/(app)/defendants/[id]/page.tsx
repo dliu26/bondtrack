@@ -6,6 +6,7 @@ import DefendantInfoCard from './_components/DefendantInfoCard'
 import NotesEditor from './_components/NotesEditor'
 import BondDetailCard from './_components/BondDetailCard'
 import CheckinTable from './_components/CheckinTable'
+import PastBondsSection from './_components/PastBondsSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -81,16 +82,13 @@ export default async function DefendantPage({ params }: Props) {
           </div>
         )}
 
-        {/* Inactive bonds */}
+        {/* Inactive bonds — collapsible */}
         {inactiveBonds.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-700">
-              Prior Bonds
-            </h2>
+          <PastBondsSection count={inactiveBonds.length}>
             {inactiveBonds.map((bond) => (
               <BondDetailCard key={bond.id} bond={bond} defendantId={id} />
             ))}
-          </div>
+          </PastBondsSection>
         )}
 
         {bonds.length === 0 && (

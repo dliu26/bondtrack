@@ -31,8 +31,15 @@ export default async function DashboardPage() {
   const bondIds = bonds.map((b) => b.id)
   const defendantIds = bonds.map((b) => b.defendant_id)
 
+  // Count closed bonds for the link at the bottom
+  const { count: closedCount } = await supabase
+    .from('bonds')
+    .select('id', { count: 'exact', head: true })
+    .eq('bondsman_id', user.id)
+    .in('status', ['exonerated', 'forfeited', 'closed'])
+
   if (bondIds.length === 0) {
-    return <EmptyDashboard />
+    return <EmptyDashboard closedCount={closedCount ?? 0} />
   }
 
   // ── 2. Parallel fetch: court dates, payments, check-ins ───────────────
@@ -208,11 +215,20 @@ export default async function DashboardPage() {
           <BondCard key={bond.id} bond={bond} />
         ))}
       </div>
+
+      {/* Closed bonds link */}
+      {(closedCount ?? 0) > 0 && (
+        <div className="mt-6 text-center">
+          <Link href="/bonds/history" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+            View {closedCount} closed bond{closedCount !== 1 ? 's' : ''} →
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
 
-function EmptyDashboard() {
+function EmptyDashboard({ closedCount }: { closedCount: number }) {
   return (
     <div className="px-4 py-4 md:px-8 md:py-8 max-w-6xl">
       <div className="flex items-center justify-between mb-6 md:mb-8">
@@ -239,6 +255,13 @@ function EmptyDashboard() {
           Add Your First Bond
         </Link>
       </div>
+      {closedCount > 0 && (
+        <div className="mt-6 text-center">
+          <Link href="/bonds/history" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
+            View {closedCount} closed bond{closedCount !== 1 ? 's' : ''} →
+          </Link>
+        </div>
+      )}
     </div>
   )
 }
