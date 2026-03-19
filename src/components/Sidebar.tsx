@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, PlusCircle, Bell, LogOut, Shield } from 'lucide-react'
+import { LayoutDashboard, PlusCircle, Bell, LogOut, Shield, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import clsx from 'clsx'
 
@@ -10,6 +10,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/bonds/new', label: 'Add Bond', icon: PlusCircle },
   { href: '/notifications', label: 'Notifications', icon: Bell },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
 interface SidebarProps {

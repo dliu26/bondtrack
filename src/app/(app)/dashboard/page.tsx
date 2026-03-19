@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { PlusCircle } from 'lucide-react'
+import { PlusCircle, Archive } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import BondCard from '@/components/BondCard'
 import MorningBriefing from '@/components/MorningBriefing'
@@ -216,11 +216,15 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Closed bonds link */}
+      {/* Bond history button */}
       {(closedCount ?? 0) > 0 && (
-        <div className="mt-6 text-center">
-          <Link href="/bonds/history" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-            View {closedCount} closed bond{closedCount !== 1 ? 's' : ''} →
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/bonds/history"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors min-h-[44px]"
+          >
+            <Archive className="w-4 h-4" />
+            Bond History ({closedCount})
           </Link>
         </div>
       )}
@@ -256,9 +260,13 @@ function EmptyDashboard({ closedCount }: { closedCount: number }) {
         </Link>
       </div>
       {closedCount > 0 && (
-        <div className="mt-6 text-center">
-          <Link href="/bonds/history" className="text-sm text-gray-400 hover:text-gray-700 transition-colors">
-            View {closedCount} closed bond{closedCount !== 1 ? 's' : ''} →
+        <div className="mt-6 flex justify-center">
+          <Link
+            href="/bonds/history"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors min-h-[44px]"
+          >
+            <Archive className="w-4 h-4" />
+            Bond History ({closedCount})
           </Link>
         </div>
       )}

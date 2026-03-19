@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Pencil, Check, X } from 'lucide-react'
 import clsx from 'clsx'
 import { updateDefendant } from '../actions'
+import { validatePhone, validateDob } from '@/lib/validation'
 import type { Defendant } from '@/types/database'
 
 function Field({ label, value }: { label: string; value: string | null }) {
@@ -48,6 +49,7 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
   const [editing, setEditing] = useState(false)
   const [saving, startSave] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const [form, setForm] = useState({
     firstName: defendant.first_name,
@@ -76,6 +78,16 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
       setError('First and last name are required.')
       return
     }
+    const newFieldErrors: Record<string, string> = {}
+    const phoneErr = validatePhone(form.phone)
+    if (phoneErr) newFieldErrors.phone = phoneErr
+    const dobErr = validateDob(form.dob)
+    if (dobErr) newFieldErrors.dob = dobErr
+    if (Object.keys(newFieldErrors).length > 0) {
+      setFieldErrors(newFieldErrors)
+      return
+    }
+    setFieldErrors({})
     setError(null)
     startSave(async () => {
       const result = await updateDefendant(defendant.id, form)
@@ -100,8 +112,14 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InputField label="First Name *" value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} placeholder="John" />
           <InputField label="Last Name *" value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} placeholder="Smith" />
-          <InputField label="Date of Birth" type="date" value={form.dob} onChange={(v) => setForm({ ...form, dob: v })} />
-          <InputField label="Phone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(214) 555-0100" />
+          <div>
+            <InputField label="Date of Birth" type="date" value={form.dob} onChange={(v) => setForm({ ...form, dob: v })} />
+            {fieldErrors.dob && <p className="mt-1 text-sm text-red-600">{fieldErrors.dob}</p>}
+          </div>
+          <div>
+            <InputField label="Phone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(214) 555-0100" />
+            {fieldErrors.phone && <p className="mt-1 text-sm text-red-600">{fieldErrors.phone}</p>}
+          </div>
           <div className="sm:col-span-2">
             <InputField label="Address" value={form.address} onChange={(v) => setForm({ ...form, address: v })} placeholder="123 Main St, Dallas TX 75201" />
           </div>

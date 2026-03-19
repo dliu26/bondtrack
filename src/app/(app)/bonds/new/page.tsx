@@ -7,6 +7,12 @@ import clsx from 'clsx'
 import { searchDefendants, createBond } from './actions'
 import type { CreateBondInput } from './actions'
 import type { CheckinFrequency } from '@/types/database'
+import {
+  validateDefendantStep,
+  validateBondStep,
+  validateCourtDateStep,
+  validatePaymentsStep,
+} from '@/lib/validation'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -134,6 +140,11 @@ function Field({ children }: { children: React.ReactNode }) {
   return <div>{children}</div>
 }
 
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null
+  return <p className="mt-1 text-sm text-red-600">{message}</p>
+}
+
 // ── Progress bar ───────────────────────────────────────────────────────────────
 
 const STEPS = ['Defendant', 'Bond Details', 'Co-Signer', 'Court Date', 'Payment Plan']
@@ -191,9 +202,11 @@ function ProgressBar({ current }: { current: number }) {
 function StepDefendant({
   form,
   setForm,
+  errors = {},
 }: {
   form: DefendantForm
   setForm: (f: DefendantForm) => void
+  errors?: Record<string, string>
 }) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<
@@ -341,21 +354,25 @@ function StepDefendant({
           <FieldRow>
             <Field>
               <Label required>First Name</Label>
-              <Input value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} placeholder="John" />
+              <Input value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} placeholder="John" className={errors.firstName ? 'border-red-400' : ''} />
+              <FieldError message={errors.firstName} />
             </Field>
             <Field>
               <Label required>Last Name</Label>
-              <Input value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} placeholder="Smith" />
+              <Input value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} placeholder="Smith" className={errors.lastName ? 'border-red-400' : ''} />
+              <FieldError message={errors.lastName} />
             </Field>
           </FieldRow>
           <FieldRow>
             <Field>
               <Label>Date of Birth</Label>
-              <Input type="date" value={form.dob} onChange={(v) => setForm({ ...form, dob: v })} />
+              <Input type="date" value={form.dob} onChange={(v) => setForm({ ...form, dob: v })} className={errors.dob ? 'border-red-400' : ''} />
+              <FieldError message={errors.dob} />
             </Field>
             <Field>
               <Label>Phone Number</Label>
-              <Input value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(214) 555-0100" />
+              <Input value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(214) 555-0100" className={errors.phone ? 'border-red-400' : ''} />
+              <FieldError message={errors.phone} />
             </Field>
           </FieldRow>
           <Field>
@@ -382,7 +399,15 @@ function StepDefendant({
 
 // ── Step 2: Bond Details ───────────────────────────────────────────────────────
 
-function StepBond({ form, setForm }: { form: BondForm; setForm: (f: BondForm) => void }) {
+function StepBond({
+  form,
+  setForm,
+  errors = {},
+}: {
+  form: BondForm
+  setForm: (f: BondForm) => void
+  errors?: Record<string, string>
+}) {
   return (
     <div className="space-y-6">
       <div>
@@ -395,27 +420,17 @@ function StepBond({ form, setForm }: { form: BondForm; setForm: (f: BondForm) =>
           <Label required>Bond Amount</Label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input
-              type="number"
-              value={form.bondAmount}
-              onChange={(v) => setForm({ ...form, bondAmount: v })}
-              placeholder="50000"
-              className="pl-8"
-            />
+            <Input type="number" value={form.bondAmount} onChange={(v) => setForm({ ...form, bondAmount: v })} placeholder="50000" className={clsx('pl-8', errors.bondAmount && 'border-red-400')} />
           </div>
+          <FieldError message={errors.bondAmount} />
         </Field>
         <Field>
           <Label required>Premium Owed</Label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input
-              type="number"
-              value={form.premiumOwed}
-              onChange={(v) => setForm({ ...form, premiumOwed: v })}
-              placeholder="5000"
-              className="pl-8"
-            />
+            <Input type="number" value={form.premiumOwed} onChange={(v) => setForm({ ...form, premiumOwed: v })} placeholder="5000" className={clsx('pl-8', errors.premiumOwed && 'border-red-400')} />
           </div>
+          <FieldError message={errors.premiumOwed} />
         </Field>
       </FieldRow>
 
@@ -424,51 +439,31 @@ function StepBond({ form, setForm }: { form: BondForm; setForm: (f: BondForm) =>
           <Label>Premium Paid So Far</Label>
           <div className="relative">
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input
-              type="number"
-              value={form.premiumPaid}
-              onChange={(v) => setForm({ ...form, premiumPaid: v })}
-              placeholder="0"
-              className="pl-8"
-            />
+            <Input type="number" value={form.premiumPaid} onChange={(v) => setForm({ ...form, premiumPaid: v })} placeholder="0" className={clsx('pl-8', errors.premiumPaid && 'border-red-400')} />
           </div>
+          <FieldError message={errors.premiumPaid} />
         </Field>
         <Field>
           <Label>Charge / Offense</Label>
-          <Input
-            value={form.charge}
-            onChange={(v) => setForm({ ...form, charge: v })}
-            placeholder="DWI, Assault, etc."
-          />
+          <Input value={form.charge} onChange={(v) => setForm({ ...form, charge: v })} placeholder="DWI, Assault, etc." />
         </Field>
       </FieldRow>
 
       <FieldRow>
         <Field>
           <Label>Case Number</Label>
-          <Input
-            value={form.caseNumber}
-            onChange={(v) => setForm({ ...form, caseNumber: v })}
-            placeholder="2024-CR-001234"
-          />
+          <Input value={form.caseNumber} onChange={(v) => setForm({ ...form, caseNumber: v })} placeholder="2024-CR-001234" className={errors.caseNumber ? 'border-red-400' : ''} />
+          <FieldError message={errors.caseNumber} />
         </Field>
         <Field>
           <Label>County</Label>
-          <Input
-            value={form.county}
-            onChange={(v) => setForm({ ...form, county: v })}
-            placeholder="Collin"
-          />
+          <Input value={form.county} onChange={(v) => setForm({ ...form, county: v })} placeholder="Collin" />
         </Field>
       </FieldRow>
 
       <Field>
         <Label>Court</Label>
-        <Input
-          value={form.court}
-          onChange={(v) => setForm({ ...form, court: v })}
-          placeholder="219th District Court"
-        />
+        <Input value={form.court} onChange={(v) => setForm({ ...form, court: v })} placeholder="219th District Court" />
       </Field>
     </div>
   )
@@ -582,9 +577,11 @@ function StepCosigner({
 function StepCourtDate({
   form,
   setForm,
+  errors = {},
 }: {
   form: CourtDateForm
   setForm: (f: CourtDateForm) => void
+  errors?: Record<string, string>
 }) {
   return (
     <div className="space-y-6">
@@ -616,7 +613,8 @@ function StepCourtDate({
           <FieldRow>
             <Field>
               <Label required>Date</Label>
-              <Input type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
+              <Input type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} className={errors.date ? 'border-red-400' : ''} />
+              <FieldError message={errors.date} />
             </Field>
             <Field>
               <Label>Time</Label>
@@ -643,10 +641,12 @@ function StepPayments({
   payments,
   setPayments,
   premiumOwed,
+  errors = {},
 }: {
   payments: PaymentItem[]
   setPayments: (p: PaymentItem[]) => void
   premiumOwed: string
+  errors?: Record<string, string>
 }) {
   const [numPayments, setNumPayments] = useState('3')
 
@@ -735,33 +735,33 @@ function StepPayments({
       {payments.length > 0 && (
         <div className="space-y-3">
           {payments.map((p, i) => (
-            <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
-              <span className="text-gray-500 text-sm font-medium w-6 shrink-0">#{i + 1}</span>
-              <div className="flex-1 grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+            <div key={i} className="bg-gray-50 rounded-xl px-4 py-3 space-y-1">
+              <div className="flex items-center gap-3">
+                <span className="text-gray-500 text-sm font-medium w-6 shrink-0">#{i + 1}</span>
+                <div className="flex-1 grid grid-cols-2 gap-3">
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                      type="number"
+                      value={p.amountDue}
+                      onChange={(e) => update(i, 'amountDue', e.target.value)}
+                      placeholder="Amount"
+                      className={clsx('w-full pl-7 pr-3 py-2.5 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]', errors[`payment_${i}_amount`] ? 'border-red-400' : 'border-gray-300')}
+                    />
+                  </div>
                   <input
-                    type="number"
-                    value={p.amountDue}
-                    onChange={(e) => update(i, 'amountDue', e.target.value)}
-                    placeholder="Amount"
-                    className="w-full pl-7 pr-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
+                    type="date"
+                    value={p.dueDate}
+                    onChange={(e) => update(i, 'dueDate', e.target.value)}
+                    className={clsx('w-full px-3 py-2.5 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]', errors[`payment_${i}_date`] ? 'border-red-400' : 'border-gray-300')}
                   />
                 </div>
-                <input
-                  type="date"
-                  value={p.dueDate}
-                  onChange={(e) => update(i, 'dueDate', e.target.value)}
-                  className="w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
-                />
+                <button type="button" onClick={() => remove(i)} className="text-red-400 hover:text-red-600 transition-colors shrink-0">
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => remove(i)}
-                className="text-red-400 hover:text-red-600 transition-colors shrink-0"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+              {errors[`payment_${i}_amount`] && <p className="text-xs text-red-600 ml-9">{errors[`payment_${i}_amount`]}</p>}
+              {errors[`payment_${i}_date`] && <p className="text-xs text-red-600 ml-9">{errors[`payment_${i}_date`]}</p>}
             </div>
           ))}
 
@@ -792,6 +792,7 @@ function StepPayments({
               {' '}premium owed
             </div>
           )}
+          {errors.total && <p className="text-sm text-red-600">{errors.total}</p>}
         </div>
       )}
     </div>
@@ -800,28 +801,37 @@ function StepPayments({
 
 // ── Validation ─────────────────────────────────────────────────────────────────
 
-function validateStep(
+function getStepErrors(
   step: number,
   defendant: DefendantForm,
-  bond: BondForm
-): string | null {
+  bond: BondForm,
+  courtDate: CourtDateForm,
+  payments: PaymentItem[]
+): Record<string, string> {
+  if (step === 0) return validateDefendantStep(defendant)
+  if (step === 1) return validateBondStep(bond)
+  if (step === 3) return validateCourtDateStep(courtDate)
+  if (step === 4) return validatePaymentsStep(payments, bond.premiumOwed)
+  return {}
+}
+
+function canProceed(
+  step: number,
+  defendant: DefendantForm,
+  bond: BondForm,
+  courtDate: CourtDateForm
+): boolean {
   if (step === 0) {
-    if (defendant.mode === 'search' && !defendant.existingId) {
-      return 'Please select an existing defendant or switch to "Add New".'
-    }
-    if (defendant.mode === 'new' && (!defendant.firstName.trim() || !defendant.lastName.trim())) {
-      return 'First name and last name are required.'
-    }
+    if (defendant.mode === 'search') return !!defendant.existingId
+    return !!defendant.firstName.trim() && !!defendant.lastName.trim()
   }
   if (step === 1) {
-    if (!bond.bondAmount || parseFloat(bond.bondAmount) <= 0) {
-      return 'Bond amount is required and must be greater than zero.'
-    }
-    if (!bond.premiumOwed || parseFloat(bond.premiumOwed) < 0) {
-      return 'Premium owed is required.'
-    }
+    return !!bond.bondAmount && parseFloat(bond.bondAmount) > 0 && bond.premiumOwed !== ''
   }
-  return null
+  if (step === 3) {
+    return courtDate.skip || !!courtDate.date
+  }
+  return true
 }
 
 // ── Main page ──────────────────────────────────────────────────────────────────
@@ -834,19 +844,21 @@ export default function NewBondPage() {
   const [cosigners, setCosigners] = useState<CosignerForm[]>([])
   const [courtDate, setCourtDate] = useState<CourtDateForm>({ skip: false, date: '', time: '', location: '' })
   const [payments, setPayments] = useState<PaymentItem[]>([])
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, startSubmit] = useTransition()
 
+  const proceed = canProceed(step, defendant, bond, courtDate)
+
   function next() {
-    const err = validateStep(step, defendant, bond)
-    if (err) { setValidationError(err); return }
-    setValidationError(null)
+    const errs = getStepErrors(step, defendant, bond, courtDate, payments)
+    if (Object.keys(errs).length > 0) { setFieldErrors(errs); return }
+    setFieldErrors({})
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
   }
 
   function back() {
-    setValidationError(null)
+    setFieldErrors({})
     setStep((s) => Math.max(s - 1, 0))
   }
 
@@ -912,25 +924,20 @@ export default function NewBondPage() {
 
       {/* Step content */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-8 mb-6">
-        {step === 0 && <StepDefendant form={defendant} setForm={setDefendant} />}
-        {step === 1 && <StepBond form={bond} setForm={setBond} />}
+        {step === 0 && <StepDefendant form={defendant} setForm={(f) => { setDefendant(f); setFieldErrors({}) }} errors={fieldErrors} />}
+        {step === 1 && <StepBond form={bond} setForm={(f) => { setBond(f); setFieldErrors({}) }} errors={fieldErrors} />}
         {step === 2 && <StepCosigner cosigners={cosigners} setCosigners={setCosigners} />}
-        {step === 3 && <StepCourtDate form={courtDate} setForm={setCourtDate} />}
+        {step === 3 && <StepCourtDate form={courtDate} setForm={(f) => { setCourtDate(f); setFieldErrors({}) }} errors={fieldErrors} />}
         {step === 4 && (
           <StepPayments
             payments={payments}
-            setPayments={setPayments}
+            setPayments={(p) => { setPayments(p); setFieldErrors({}) }}
             premiumOwed={bond.premiumOwed}
+            errors={fieldErrors}
           />
         )}
       </div>
 
-      {/* Validation error */}
-      {validationError && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-700 text-base">
-          {validationError}
-        </div>
-      )}
       {submitError && (
         <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-700 text-base">
           {submitError}
@@ -958,7 +965,8 @@ export default function NewBondPage() {
           <button
             type="button"
             onClick={next}
-            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors min-h-[44px]"
+            disabled={!proceed}
+            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next Step
             <ChevronRight className="w-4 h-4" />

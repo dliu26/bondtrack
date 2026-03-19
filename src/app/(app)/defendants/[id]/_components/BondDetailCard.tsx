@@ -96,10 +96,19 @@ function CourtDateRow({
   const daysTo = status === 'upcoming' ? getDaysToDate(cd.date) : null
 
   async function act(newStatus: CourtDateStatus) {
-    const label =
-      newStatus === 'missed'
-        ? 'Mark this court date as MISSED? This will set a 90-day forfeiture deadline.'
-        : `Mark as ${newStatus}?`
+    let label: string
+    if (newStatus === 'missed') {
+      label = 'Mark this court date as MISSED? This will set a 90-day forfeiture deadline.'
+    } else if (newStatus === 'completed') {
+      const daysAway = getDaysToDate(cd.date)
+      if (daysAway !== null && daysAway > 7) {
+        label = `This court date is still ${daysAway} days away. Are you sure it was completed?`
+      } else {
+        label = 'Mark as completed?'
+      }
+    } else {
+      label = `Mark as ${newStatus}?`
+    }
     if (!confirm(label)) return
 
     const prev = status
@@ -302,7 +311,28 @@ export default function BondDetailCard({
 
   async function handleStatusChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newStatus = e.target.value as BondStatus
-    if (!confirm(`Change bond status to "${newStatus}"?`)) return
+
+    // Warn: cannot reactivate forfeited
+    if (bondStatus === 'forfeited' && newStatus === 'active') {
+      toast('A forfeited bond cannot be set back to active.', 'error')
+      e.currentTarget.value = bondStatus
+      return
+    }
+
+    // Warn: closing with overdue payments
+    const hasOverdue = bond.payments.some((p) => p.status === 'overdue')
+    if ((newStatus === 'closed' || newStatus === 'exonerated') && hasOverdue) {
+      if (!confirm('This bond has outstanding overdue payments. Are you sure you want to close it?')) {
+        e.currentTarget.value = bondStatus
+        return
+      }
+    }
+
+    if (!confirm(`Change bond status to "${newStatus}"?`)) {
+      e.currentTarget.value = bondStatus
+      return
+    }
+
     const prev = bondStatus
     setBondStatus(newStatus)
     setBusyStatus(true)

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { addDays, format } from 'date-fns'
 import type { CheckinFrequency, BondStatus, CourtDateStatus } from '@/types/database'
+import { validatePhone, validateDob } from '@/lib/validation'
 
 function revalidate(defendantId: string) {
   revalidatePath(`/defendants/${defendantId}`)
@@ -24,6 +25,17 @@ export async function updateDefendant(
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
+
+  // Server-side validation
+  if (!data.firstName.trim() || !data.lastName.trim()) return { error: 'First and last name are required.' }
+  if (data.phone) {
+    const err = validatePhone(data.phone)
+    if (err) return { error: err }
+  }
+  if (data.dob) {
+    const err = validateDob(data.dob)
+    if (err) return { error: err }
+  }
 
   const { error } = await supabase
     .from('defendants')
@@ -145,6 +157,21 @@ export async function updateBondStatus(
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Unauthorized' }
+
+  // Fetch current bond state for validation
+  const { data: current } = await supabase
+    .from('bonds')
+    .select('status')
+    .eq('id', bondId)
+    .eq('bondsman_id', user.id)
+    .single()
+
+  if (!current) return { error: 'Bond not found.' }
+
+  // Cannot reactivate a forfeited bond
+  if (current.status === 'forfeited' && newStatus === 'active') {
+    return { error: 'A forfeited bond cannot be set back to active.' }
+  }
 
   const { error } = await supabase
     .from('bonds')

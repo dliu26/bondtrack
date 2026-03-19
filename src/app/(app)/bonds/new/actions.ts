@@ -3,6 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { CheckinFrequency } from '@/types/database'
+import {
+  validatePhone,
+  validateDob,
+  validateCaseNumber,
+  validateCourtDate,
+} from '@/lib/validation'
 
 export interface CreateBondInput {
   defendant: {
@@ -95,10 +101,57 @@ export async function createBond(input: CreateBondInput): Promise<{ error: strin
     defendantId = newDef.id
   }
 
-  // ── Step 2: Create bond ────────────────────────────────────────────────
-  if (!input.bond.bondAmount || input.bond.bondAmount <= 0) {
-    return { error: 'Bond amount is required.' }
+  // ── Server-side validation ─────────────────────────────────────────────
+  // Defendant phone / dob
+  if (input.defendant.mode === 'new') {
+    if (input.defendant.phone) {
+      const err = validatePhone(input.defendant.phone)
+      if (err) return { error: err }
+    }
+    if (input.defendant.dob) {
+      const err = validateDob(input.defendant.dob)
+      if (err) return { error: err }
+    }
   }
+
+  // Bond amounts
+  if (!input.bond.bondAmount || input.bond.bondAmount <= 0)
+    return { error: 'Bond amount must be greater than $0.' }
+  if (input.bond.premiumOwed > input.bond.bondAmount)
+    return { error: 'Premium owed cannot exceed bond amount.' }
+  if (input.bond.premiumPaid > input.bond.premiumOwed)
+    return { error: 'Premium paid cannot exceed premium owed.' }
+
+  // Case number format
+  if (input.bond.caseNumber) {
+    const err = validateCaseNumber(input.bond.caseNumber)
+    if (err) return { error: err }
+  }
+
+  // Court date not in past
+  if (!input.courtDate.skip && input.courtDate.date) {
+    const err = validateCourtDate(input.courtDate.date)
+    if (err) return { error: err }
+  }
+
+  // Payment validation
+  if (input.payments.length > 0) {
+    for (const p of input.payments) {
+      if (p.amountDue <= 0) return { error: 'Each payment amount must be greater than $0.' }
+    }
+    const total = input.payments.reduce((s, p) => s + p.amountDue, 0)
+    if (input.bond.premiumOwed > 0 && total > input.bond.premiumOwed + 0.01) {
+      return { error: `Payment total ($${total.toFixed(2)}) exceeds premium owed ($${input.bond.premiumOwed.toFixed(2)}).` }
+    }
+    const dates = input.payments.map((p) => p.dueDate)
+    const today = new Date(); today.setHours(0,0,0,0)
+    for (let i = 0; i < dates.length; i++) {
+      if (new Date(dates[i]) < today) return { error: `Payment #${i+1} due date must be in the future.` }
+      if (i > 0 && dates[i] <= dates[i-1]) return { error: `Payment due dates must be in chronological order with no duplicates.` }
+    }
+  }
+
+  // ── Step 2: Create bond ────────────────────────────────────────────────
 
   const { data: bond, error: bondErr } = await supabase
     .from('bonds')
