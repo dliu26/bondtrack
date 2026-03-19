@@ -32,8 +32,10 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  const publicPaths = ['/', '/login', '/privacy']
+
   // Unauthenticated user trying to access protected route
-  if (!user && pathname !== '/login') {
+  if (!user && !publicPaths.includes(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
