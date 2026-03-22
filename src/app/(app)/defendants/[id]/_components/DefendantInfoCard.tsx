@@ -7,6 +7,7 @@ import { updateDefendant } from '../actions'
 import { validatePhone, validateDob } from '@/lib/validation'
 import { toast } from '@/lib/toast'
 import type { Defendant } from '@/types/database'
+import PhoneButton from '@/components/PhoneButton'
 
 function Field({ label, value }: { label: string; value: string | null }) {
   return (
@@ -188,7 +189,20 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         <Field label="Date of Birth" value={defendant.dob} />
-        <Field label="Phone" value={defendant.phone} />
+        <div>
+          <p className="text-sm text-gray-500 mb-0.5">Phone</p>
+          {defendant.phone ? (
+            <PhoneButton
+              phone={defendant.phone}
+              calledName={`${defendant.first_name} ${defendant.last_name}`}
+              defendantId={defendant.id}
+              label={defendant.phone}
+              variant="green"
+            />
+          ) : (
+            <p className="text-lg text-gray-400 italic">Not provided</p>
+          )}
+        </div>
         <Field label="Address" value={defendant.address} />
       </div>
     </div>

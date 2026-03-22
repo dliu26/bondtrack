@@ -1,18 +1,16 @@
 'use server'
 
 /**
- * Run this SQL in Supabase before deploying settings:
+ * Run this SQL in Supabase to update the bondsman_settings table:
  *
+ * -- If creating fresh:
  * create table bondsman_settings (
  *   id uuid primary key default uuid_generate_v4(),
  *   bondsman_id uuid not null references auth.users(id) on delete cascade,
  *   name text,
  *   phone text,
  *   agency_name text,
- *   sms_court_changes boolean not null default true,
- *   sms_missed_checkins boolean not null default true,
- *   sms_overdue_payments boolean not null default true,
- *   sms_forfeiture_warnings boolean not null default true,
+ *   show_daily_list boolean not null default true,
  *   default_checkin_frequency text not null default 'weekly'
  *     check (default_checkin_frequency in ('daily', 'weekly', 'custom')),
  *   default_county text,
@@ -23,6 +21,14 @@
  * alter table bondsman_settings enable row level security;
  * create policy "own settings" on bondsman_settings
  *   for all using (bondsman_id = auth.uid());
+ *
+ * -- If migrating existing table:
+ * alter table bondsman_settings
+ *   drop column if exists sms_court_changes,
+ *   drop column if exists sms_missed_checkins,
+ *   drop column if exists sms_overdue_payments,
+ *   drop column if exists sms_forfeiture_warnings,
+ *   add column if not exists show_daily_list boolean not null default true;
  */
 
 import { createClient } from '@/lib/supabase/server'
@@ -33,10 +39,7 @@ export interface BondsmanSettings {
   name: string | null
   phone: string | null
   agency_name: string | null
-  sms_court_changes: boolean
-  sms_missed_checkins: boolean
-  sms_overdue_payments: boolean
-  sms_forfeiture_warnings: boolean
+  show_daily_list: boolean
   default_checkin_frequency: 'daily' | 'weekly' | 'custom'
   default_county: string | null
   default_court: string | null
@@ -65,7 +68,6 @@ export async function saveProfile(data: {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  // Validate phone if provided
   if (data.phone) {
     const digits = data.phone.replace(/\D/g, '')
     if (digits.length !== 10 && !(digits.length === 11 && digits.startsWith('1'))) {
@@ -88,10 +90,7 @@ export async function saveProfile(data: {
 }
 
 export async function saveNotifications(prefs: {
-  smsCourtChanges: boolean
-  smsMissedCheckins: boolean
-  smsOverduePayments: boolean
-  smsForfeitureWarnings: boolean
+  showDailyList: boolean
 }): Promise<{ error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -101,10 +100,7 @@ export async function saveNotifications(prefs: {
     .from('bondsman_settings')
     .upsert({
       bondsman_id: user.id,
-      sms_court_changes: prefs.smsCourtChanges,
-      sms_missed_checkins: prefs.smsMissedCheckins,
-      sms_overdue_payments: prefs.smsOverduePayments,
-      sms_forfeiture_warnings: prefs.smsForfeitureWarnings,
+      show_daily_list: prefs.showDailyList,
     }, { onConflict: 'bondsman_id' })
 
   if (error) return { error: error.message }

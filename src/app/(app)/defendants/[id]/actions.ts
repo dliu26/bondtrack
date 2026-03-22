@@ -182,3 +182,60 @@ export async function updateBondStatus(
   if (error) return { error: error.message }
   revalidate(defendantId)
 }
+
+export async function markCheckinConfirmed(defendantId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: defendant } = await supabase
+    .from('defendants')
+    .select('id')
+    .eq('id', defendantId)
+    .eq('bondsman_id', user.id)
+    .single()
+  if (!defendant) return { error: 'Defendant not found.' }
+
+  const now = new Date().toISOString()
+  await supabase.from('checkins').insert({
+    defendant_id: defendantId,
+    scheduled_at: now,
+    responded_at: now,
+    response: 'manual',
+    status: 'confirmed',
+  })
+  await supabase
+    .from('defendants')
+    .update({ last_checkin_at: now })
+    .eq('id', defendantId)
+
+  revalidate(defendantId)
+}
+
+export async function logNote(defendantId: string, note: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  const { data: defendant } = await supabase
+    .from('defendants')
+    .select('notes, bondsman_id')
+    .eq('id', defendantId)
+    .eq('bondsman_id', user.id)
+    .single()
+  if (!defendant) return { error: 'Defendant not found.' }
+
+  const timestamp = new Date().toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: 'numeric', minute: '2-digit'
+  })
+  const entry = `[${timestamp}] ${note}`
+  const newNotes = [defendant.notes, entry].filter(Boolean).join('\n')
+
+  await supabase
+    .from('defendants')
+    .update({ notes: newNotes })
+    .eq('id', defendantId)
+
+  revalidate(defendantId)
+}

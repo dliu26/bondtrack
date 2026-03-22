@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { PlusCircle, Archive } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import BondCard from '@/components/BondCard'
-import MorningBriefing from '@/components/MorningBriefing'
+import TodaysFocus from './_components/TodaysFocus'
 import {
   calculateUrgency,
   getDaysToDate,
@@ -22,7 +22,7 @@ export default async function DashboardPage() {
   // ── 1. Active bonds + defendants ──────────────────────────────────────
   const { data: bondsRaw } = await supabase
     .from('bonds')
-    .select('*, defendants(*)')
+    .select('*, defendants(*), cosigners(id, first_name, last_name, phone)')
     .eq('bondsman_id', user.id)
     .eq('status', 'active')
     .order('created_at', { ascending: false })
@@ -117,6 +117,9 @@ export default async function DashboardPage() {
       daysToForfeiture,
     })
 
+    const cosigners = (bond as any).cosigners as Array<{id: string; first_name: string; last_name: string; phone: string | null}> | undefined
+    const firstCosignerWithPhone = cosigners?.find((c) => c.phone) ?? null
+
     return {
       id: bond.id,
       bondAmount: bond.bond_amount,
@@ -130,8 +133,11 @@ export default async function DashboardPage() {
         id: defendant.id,
         firstName: defendant.first_name,
         lastName: defendant.last_name,
+        phone: defendant.phone,
         lastCheckinAt: defendant.last_checkin_at,
       },
+      cosignerPhone: firstCosignerWithPhone?.phone ?? null,
+      cosignerName: firstCosignerWithPhone ? `${firstCosignerWithPhone.first_name} ${firstCosignerWithPhone.last_name}` : null,
       nextCourtDate: nextCourtDate
         ? {
             id: nextCourtDate.id,
@@ -204,10 +210,8 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Morning Briefing */}
-      <MorningBriefing
-        portfolioSummary={{ totalActive: processed.length, redCount, yellowCount, greenCount }}
-      />
+      {/* Today's Focus */}
+      <TodaysFocus bonds={processed} />
 
       {/* Bond Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

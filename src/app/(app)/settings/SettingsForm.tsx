@@ -157,7 +157,6 @@ function ProfileSection({ settings, email }: { settings: BondsmanSettings | null
           placeholder="(214) 555-0100"
           className={errors.phone ? 'border-red-400' : ''}
         />
-        <p className="mt-1 text-xs text-gray-400">Used to receive forfeiture deadline SMS alerts.</p>
       </FieldGroup>
       <FieldGroup label="Agency Name">
         <TextInput value={agencyName} onChange={setAgencyName} placeholder="Smith Bail Bonds" />
@@ -170,35 +169,29 @@ function ProfileSection({ settings, email }: { settings: BondsmanSettings | null
 // ── Notifications section ─────────────────────────────────────────────────────
 
 function NotificationsSection({ settings }: { settings: BondsmanSettings | null }) {
-  const [courtChanges, setCourtChanges] = useState(settings?.sms_court_changes ?? true)
-  const [missedCheckins, setMissedCheckins] = useState(settings?.sms_missed_checkins ?? true)
-  const [overduePayments, setOverduePayments] = useState(settings?.sms_overdue_payments ?? true)
-  const [forfeitureWarnings, setForfeitureWarnings] = useState(settings?.sms_forfeiture_warnings ?? true)
+  const [showDailyList, setShowDailyList] = useState(settings?.show_daily_list ?? true)
   const [busy, setBusy] = useState(false)
 
   async function handleSave() {
     setBusy(true)
-    const result = await saveNotifications({
-      smsCourtChanges: courtChanges,
-      smsMissedCheckins: missedCheckins,
-      smsOverduePayments: overduePayments,
-      smsForfeitureWarnings: forfeitureWarnings,
-    })
+    const result = await saveNotifications({ showDailyList })
     setBusy(false)
     if (result.error) toast(result.error, 'error')
-    else toast('Notification preferences saved.')
+    else toast('Settings saved.')
   }
 
   return (
-    <Section title="SMS Notifications">
+    <Section title="Daily Reminders">
       <p className="text-sm text-gray-500 -mt-1">
-        Requires Twilio to be configured. Toggle off to silence specific alert types.
+        Control what appears on your dashboard each morning.
       </p>
       <div className="divide-y divide-gray-100">
-        <Toggle checked={courtChanges} onChange={setCourtChanges} label="Court date changes" description="Alert when a court date is added or changed via the portal scraper" />
-        <Toggle checked={missedCheckins} onChange={setMissedCheckins} label="Missed check-ins" description="Alert when a defendant doesn't respond to a check-in request" />
-        <Toggle checked={overduePayments} onChange={setOverduePayments} label="Overdue payments" description="Alert when a payment passes its due date" />
-        <Toggle checked={forfeitureWarnings} onChange={setForfeitureWarnings} label="Forfeiture deadline warnings" description="Alert at 30, 14, and 7 days before forfeiture" />
+        <Toggle
+          checked={showDailyList}
+          onChange={setShowDailyList}
+          label="Show Today's Focus on dashboard"
+          description="Displays a daily action checklist at the top of your dashboard"
+        />
       </div>
       <SaveButton onClick={handleSave} busy={busy} />
     </Section>

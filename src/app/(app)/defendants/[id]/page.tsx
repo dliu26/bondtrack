@@ -6,6 +6,7 @@ import DefendantInfoCard from './_components/DefendantInfoCard'
 import NotesEditor from './_components/NotesEditor'
 import BondDetailCard from './_components/BondDetailCard'
 import CheckinTable from './_components/CheckinTable'
+import CallLogTable from './_components/CallLogTable'
 import PastBondsSection from './_components/PastBondsSection'
 
 export const dynamic = 'force-dynamic'
@@ -31,8 +32,8 @@ export default async function DefendantPage({ params }: Props) {
 
   if (!defendant) notFound()
 
-  // ── Parallel fetch: bonds (with relations) + check-ins ────────────────
-  const [bondsRes, checkinsRes] = await Promise.all([
+  // ── Parallel fetch: bonds (with relations) + check-ins + call logs ────
+  const [bondsRes, checkinsRes, callLogsRes] = await Promise.all([
     supabase
       .from('bonds')
       .select('*, cosigners(*), court_dates(*), payments(*)')
@@ -44,10 +45,17 @@ export default async function DefendantPage({ params }: Props) {
       .eq('defendant_id', id)
       .order('scheduled_at', { ascending: false })
       .limit(50),
+    supabase
+      .from('call_logs')
+      .select('*')
+      .eq('defendant_id', id)
+      .order('created_at', { ascending: false })
+      .limit(50),
   ])
 
   const bonds = bondsRes.data ?? []
   const checkins = checkinsRes.data ?? []
+  const callLogs = callLogsRes.data ?? []
 
   const activeBonds = bonds.filter((b) => b.status === 'active')
   const inactiveBonds = bonds.filter((b) => b.status !== 'active')
@@ -105,6 +113,9 @@ export default async function DefendantPage({ params }: Props) {
 
         {/* Check-in history */}
         <CheckinTable checkins={checkins} />
+
+        {/* Call log */}
+        <CallLogTable callLogs={callLogs} />
       </div>
     </div>
   )

@@ -109,8 +109,11 @@ export interface ProcessedBond {
     id: string
     firstName: string
     lastName: string
+    phone: string | null
     lastCheckinAt: string | null
   }
+  cosignerPhone: string | null
+  cosignerName: string | null
   nextCourtDate: {
     id: string
     date: string
@@ -127,4 +130,14 @@ export interface ProcessedBond {
   } | null
   consecutiveMissedCheckins: number
   urgency: UrgencyLevel
+}
+
+export interface CallLog {
+  id: string
+  defendant_id: string
+  bondsman_id: string
+  called_name: string
+  phone: string
+  outcome: 'reached' | 'no_answer' | 'voicemail'
+  created_at: string
 }

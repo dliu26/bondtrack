@@ -13,6 +13,7 @@ import {
 import { toast } from '@/lib/toast'
 import type { Bond, CourtDate, Payment, Cosigner, BondStatus, CourtDateStatus } from '@/types/database'
 import { getDaysToDate, getDaysOverdue } from '@/lib/urgency'
+import PhoneButton from '@/components/PhoneButton'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -462,7 +463,15 @@ export default function BondDetailCard({
                 <div key={cs.id} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-base">
                   <span className="font-medium text-gray-900">{cs.first_name} {cs.last_name}</span>
                   {cs.relationship && <span className="text-gray-500 text-sm">{cs.relationship}</span>}
-                  {cs.phone && <span className="text-gray-600">{cs.phone}</span>}
+                  {cs.phone && (
+                    <PhoneButton
+                      phone={cs.phone}
+                      calledName={`Co-signer: ${cs.first_name} ${cs.last_name}`}
+                      defendantId={defendantId}
+                      label={cs.phone}
+                      variant="gray"
+                    />
+                  )}
                   {cs.address && <span className="text-gray-400 text-sm">{cs.address}</span>}
                   {cs.assets_description && (
                     <span className="text-gray-500 text-sm italic">Assets: {cs.assets_description}</span>
