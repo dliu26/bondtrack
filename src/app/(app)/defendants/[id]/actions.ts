@@ -92,7 +92,10 @@ export async function updateCourtDateStatus(
   if (error) return { error: error.message }
 
   if (newStatus === 'missed') {
-    const deadline = format(addDays(new Date(courtDateIso), 90), 'yyyy-MM-dd')
+    // Parse date-only string as a local date (not UTC) to avoid timezone shifting.
+    // Day 1 = day after missed court date; day 90 = forfeiture deadline.
+    const [y, m, d] = courtDateIso.split('-').map(Number)
+    const deadline = format(addDays(new Date(y, m - 1, d), 90), 'yyyy-MM-dd')
 
     await supabase
       .from('bonds')
