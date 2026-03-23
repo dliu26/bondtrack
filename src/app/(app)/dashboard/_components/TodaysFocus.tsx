@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
-import { ChevronDown, ChevronUp, Check, AlertCircle, Clock, CheckCircle2 } from 'lucide-react'
+import {
+  ChevronDown, ChevronUp, Check, AlertCircle, Clock, CheckCircle2,
+  FileText, Flag,
+} from 'lucide-react'
 import clsx from 'clsx'
 import PhoneButton from '@/components/PhoneButton'
 import { toast } from '@/lib/toast'
+import { todayKeyCT } from '@/lib/date'
 import { markCheckinConfirmed, logNote } from '@/app/(app)/defendants/[id]/actions'
 import type { ProcessedBond } from '@/types/database'
 
@@ -126,14 +130,10 @@ function buildFocusItems(bonds: ProcessedBond[]): FocusItem[] {
 
 // ── Local storage ─────────────────────────────────────────────────────────────
 
-function todayKey() {
-  return new Date().toISOString().split('T')[0]
-}
-
 function loadHandled(): Set<string> {
   if (typeof window === 'undefined') return new Set()
   try {
-    const raw = localStorage.getItem(`handled_${todayKey()}`)
+    const raw = localStorage.getItem(`handled_${todayKeyCT()}`)
     if (raw) return new Set(JSON.parse(raw) as string[])
   } catch {}
   return new Set()
@@ -141,11 +141,12 @@ function loadHandled(): Set<string> {
 
 function saveHandled(keys: Set<string>) {
   try {
-    localStorage.setItem(`handled_${todayKey()}`, JSON.stringify([...keys]))
+    localStorage.setItem(`handled_${todayKeyCT()}`, JSON.stringify([...keys]))
   } catch {}
 }
 
-// ── Item action button ─────────────────────────────────────────────────────────
+// ── Action button — logs a specific action to the server ───────────────────────
+// Visually: primary solid-color button with icon. Purpose: record what you did.
 
 function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => void }) {
   const [busy, setBusy] = useState(false)
@@ -161,6 +162,11 @@ function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => voi
       />
     )
   }
+
+  const Icon =
+    item.action.type === 'flag_missing' ? Flag :
+    item.action.type === 'mark_checkin' ? CheckCircle2 :
+    FileText
 
   async function handleClick() {
     setBusy(true)
@@ -191,13 +197,54 @@ function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => voi
       onClick={handleClick}
       disabled={busy}
       className={clsx(
-        'shrink-0 text-sm font-semibold px-3.5 py-2.5 rounded-xl min-h-[44px] transition-colors active:scale-95 duration-75 disabled:opacity-40 whitespace-nowrap',
+        'shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold px-4 py-2.5 rounded-xl min-h-[44px]',
+        'transition-colors active:scale-95 duration-75 disabled:opacity-40 whitespace-nowrap',
         item.urgency === 'red'
-          ? 'bg-red-50 text-red-700 hover:bg-red-100'
-          : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+          ? 'bg-red-600 text-white hover:bg-red-700'
+          : 'bg-[#0f1e3c] text-white hover:bg-[#1a2f5a]'
       )}
     >
+      <Icon className="w-3.5 h-3.5 shrink-0" />
       {busy ? '…' : item.action.label}
+    </button>
+  )
+}
+
+// ── Done checkbox — UI-only toggle to mark item as handled for today ───────────
+// Visually: outlined toggle with square checkbox + "Done" label. No server call.
+
+function DoneCheckbox({
+  handled,
+  urgency,
+  onToggle,
+}: {
+  handled: boolean
+  urgency: 'red' | 'yellow'
+  onToggle: () => void
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      title={handled ? 'Mark as not done' : 'Mark as done for today'}
+      className={clsx(
+        'shrink-0 inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2.5 rounded-xl min-h-[44px] transition-colors',
+        handled
+          ? 'bg-green-50 border border-green-200 text-green-700'
+          : clsx(
+              'border text-gray-400 hover:text-green-600',
+              urgency === 'red'
+                ? 'border-red-200 hover:border-green-300 hover:bg-green-50'
+                : 'border-yellow-200 hover:border-green-300 hover:bg-green-50'
+            )
+      )}
+    >
+      <div className={clsx(
+        'w-4 h-4 rounded border-2 flex items-center justify-center transition-all shrink-0',
+        handled ? 'bg-green-500 border-green-500' : 'border-current'
+      )}>
+        {handled && <Check className="w-2.5 h-2.5 text-white" />}
+      </div>
+      <span className="hidden sm:inline">Done</span>
     </button>
   )
 }
@@ -220,22 +267,6 @@ function FocusItemRow({
         handled && 'opacity-50'
       )}
     >
-      {/* Checkbox */}
-      <button
-        onClick={() => onHandle(item.key)}
-        className={clsx(
-          'w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-150',
-          handled
-            ? 'bg-green-500 border-green-500'
-            : item.urgency === 'red'
-            ? 'border-red-300 hover:border-red-500'
-            : 'border-yellow-300 hover:border-yellow-500'
-        )}
-        title={handled ? 'Mark as unhandled' : 'Mark as handled'}
-      >
-        {handled && <Check className="w-3.5 h-3.5 text-white" />}
-      </button>
-
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
@@ -261,10 +292,17 @@ function FocusItemRow({
         </p>
       </div>
 
-      {/* Action button */}
-      {!handled && (
-        <ItemActionButton item={item} onDone={() => onHandle(item.key)} />
-      )}
+      {/* Right side: action button + done checkbox */}
+      <div className="flex items-center gap-2 shrink-0">
+        {!handled && (
+          <ItemActionButton item={item} onDone={() => onHandle(item.key)} />
+        )}
+        <DoneCheckbox
+          handled={handled}
+          urgency={item.urgency}
+          onToggle={() => onHandle(item.key)}
+        />
+      </div>
     </div>
   )
 }
@@ -324,13 +362,13 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
   const handledItems = allItems.filter((i) => handledKeys.has(i.key))
 
   const focusedBondIds = new Set(allItems.map((i) => i.bondId))
-  const onTrackBonds = bonds.filter((b) => !focusedBondIds.has(b.id) || b.urgency === 'green')
+  const onTrackBonds = bonds
+    .filter((b) => !focusedBondIds.has(b.id) || b.urgency === 'green')
     .filter((b, idx, arr) => arr.findIndex((x) => x.id === b.id) === idx)
     .filter((b) => b.urgency === 'green')
 
   const totalActions = activeRedItems.length + activeYellowItems.length
 
-  // If nothing needs attention at all, show a simple "all clear"
   if (bonds.length === 0) return null
 
   if (totalActions === 0 && handledItems.length === 0) {

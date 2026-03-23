@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { format, parseISO } from 'date-fns'
 import { Search, ChevronRight } from 'lucide-react'
+import { formatTimestamp } from '@/lib/date'
 import clsx from 'clsx'
 
 const STATUS_CONFIG = {
@@ -104,7 +104,7 @@ export default function HistoryList({ bonds }: { bonds: ClosedBond[] }) {
                   <div className="flex items-center justify-between text-sm text-gray-400">
                     <div className="flex items-center gap-3">
                       {bond.case_number && <span>Case #{bond.case_number}</span>}
-                      <span>Added {format(parseISO(bond.created_at), 'MMM d, yyyy')}</span>
+                      <span>Added {formatTimestamp(bond.created_at)}</span>
                     </div>
                     <span className="flex items-center gap-1 text-gray-400 group-hover:text-gray-600 transition-colors">
                       View <ChevronRight className="w-3.5 h-3.5" />

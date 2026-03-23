@@ -1,4 +1,4 @@
-import { format, parseISO } from 'date-fns'
+import { formatTimestamp } from '@/lib/date'
 import { Phone, PhoneOff, PhoneCall } from 'lucide-react'
 import clsx from 'clsx'
 import type { CallLog } from '@/types/database'
@@ -38,7 +38,7 @@ export default function CallLogTable({ callLogs }: { callLogs: CallLog[] }) {
                 <div className="text-right shrink-0">
                   <p className={clsx('text-sm font-semibold', cfg.color)}>{cfg.label}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {format(parseISO(log.created_at), 'MMM d · h:mm a')}
+                    {formatTimestamp(log.created_at)}
                   </p>
                 </div>
               </div>

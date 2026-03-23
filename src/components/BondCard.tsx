@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { format, parseISO } from 'date-fns'
 import { Calendar, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Clock } from 'lucide-react'
 import clsx from 'clsx'
+import { formatDate } from '@/lib/date'
 import type { ProcessedBond } from '@/types/database'
 
 const urgencyConfig = {
@@ -27,10 +27,6 @@ const urgencyConfig = {
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(amount)
-}
-
-function formatDate(isoDate: string) {
-  return format(parseISO(isoDate), 'MMM d, yyyy')
 }
 
 function formatTime(timeStr: string | null) {

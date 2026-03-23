@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { format, parseISO } from 'date-fns'
 import { PlusCircle, Calendar, CreditCard, User, Clock, Check } from 'lucide-react'
 import clsx from 'clsx'
 import {
@@ -13,13 +12,10 @@ import {
 import { toast } from '@/lib/toast'
 import type { Bond, CourtDate, Payment, Cosigner, BondStatus, CourtDateStatus } from '@/types/database'
 import { getDaysToDate, getDaysOverdue } from '@/lib/urgency'
+import { formatDate } from '@/lib/date'
 import PhoneButton from '@/components/PhoneButton'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-function fmt(isoDate: string) {
-  return format(parseISO(isoDate), 'MMM d, yyyy')
-}
 
 function fmtTime(t: string | null) {
   if (!t) return ''
@@ -131,7 +127,7 @@ function CourtDateRow({
         <Calendar className="w-4 h-4 text-gray-400 mt-1 shrink-0" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-medium text-gray-900">{fmt(cd.date)}{fmtTime(cd.time)}</span>
+            <span className="font-medium text-gray-900">{formatDate(cd.date)}{fmtTime(cd.time)}</span>
             <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full', cfg.color)}>{cfg.label}</span>
             {daysTo !== null && (
               <span className={clsx(
@@ -265,14 +261,14 @@ function PaymentRow({ payment, defendantId }: { payment: Payment; defendantId: s
       <div className="flex-1">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-medium text-gray-900">{currency(payment.amount_due)}</span>
-          <span className="text-sm text-gray-500">due {fmt(payment.due_date)}</span>
+          <span className="text-sm text-gray-500">due {formatDate(payment.due_date)}</span>
           <span className={clsx('text-xs font-semibold px-2 py-0.5 rounded-full', cfg.color)}>{cfg.label}</span>
           {daysOverdue !== null && daysOverdue > 0 && (
             <span className="text-xs font-bold text-red-600">{daysOverdue}d overdue</span>
           )}
         </div>
         {payment.paid_at && (
-          <p className="text-xs text-gray-400 mt-0.5">Paid {fmt(payment.paid_at)}</p>
+          <p className="text-xs text-gray-400 mt-0.5">Paid {formatDate(payment.paid_at)}</p>
         )}
       </div>
       {status !== 'paid' && (
@@ -408,7 +404,7 @@ export default function BondDetailCard({
           )}>
             <Clock className="w-4 h-4 shrink-0" />
             <span>
-              Forfeiture deadline: {fmt(bond.forfeiture_deadline)}
+              Forfeiture deadline: {formatDate(bond.forfeiture_deadline)}
               {forfeitureDays !== null && (
                 <strong className="ml-1">
                   ({forfeitureDays <= 0 ? 'DEADLINE PASSED' : `${forfeitureDays} days remaining`})

@@ -1,12 +1,15 @@
-import { differenceInDays, parseISO, startOfDay } from 'date-fns'
+import { differenceInDays } from 'date-fns'
+import { startOfDayCT } from '@/lib/date'
 import type { Checkin, UrgencyLevel } from '@/types/database'
 
 export function getDaysToDate(isoDate: string): number {
-  return differenceInDays(parseISO(isoDate), startOfDay(new Date()))
+  const [y, m, d] = isoDate.split('-').map(Number)
+  return differenceInDays(new Date(y, m - 1, d), startOfDayCT())
 }
 
 export function getDaysOverdue(dueDateIso: string): number {
-  return differenceInDays(startOfDay(new Date()), parseISO(dueDateIso))
+  const [y, m, d] = dueDateIso.split('-').map(Number)
+  return differenceInDays(startOfDayCT(), new Date(y, m - 1, d))
 }
 
 export function getConsecutiveMissedCheckins(checkins: Checkin[]): number {

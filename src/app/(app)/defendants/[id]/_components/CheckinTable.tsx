@@ -1,11 +1,7 @@
-import { format, parseISO } from 'date-fns'
+import { formatTimestamp } from '@/lib/date'
 import { CheckCircle2, XCircle, Clock } from 'lucide-react'
 import clsx from 'clsx'
 import type { Checkin } from '@/types/database'
-
-function fmt(iso: string) {
-  return format(parseISO(iso), 'MMM d, yyyy · h:mm a')
-}
 
 const statusConfig = {
   confirmed: { label: 'Confirmed', icon: CheckCircle2, color: 'text-green-600' },
@@ -37,7 +33,7 @@ export default function CheckinTable({ checkins }: { checkins: Checkin[] }) {
                 const Icon = cfg.icon
                 return (
                   <tr key={c.id} className={clsx(c.status === 'missed' && 'bg-red-50/50')}>
-                    <td className="py-3 pr-6 text-gray-700">{fmt(c.scheduled_at)}</td>
+                    <td className="py-3 pr-6 text-gray-700">{formatTimestamp(c.scheduled_at)}</td>
                     <td className="py-3 pr-6">
                       <span className={clsx('flex items-center gap-1.5 font-medium', cfg.color)}>
                         <Icon className="w-4 h-4 shrink-0" />
@@ -46,7 +42,7 @@ export default function CheckinTable({ checkins }: { checkins: Checkin[] }) {
                     </td>
                     <td className="py-3 pr-6 text-gray-600">{c.response ?? '—'}</td>
                     <td className="py-3 text-gray-500">
-                      {c.responded_at ? fmt(c.responded_at) : '—'}
+                      {c.responded_at ? formatTimestamp(c.responded_at) : '—'}
                     </td>
                   </tr>
                 )
