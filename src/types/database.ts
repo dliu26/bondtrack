@@ -15,6 +15,8 @@ export interface Defendant {
   phone: string | null
   address: string | null
   checkin_frequency: CheckinFrequency
+  /** Hour of day (0-23) in America/Chicago when check-in reminder should be sent. Default 8 (= 8 AM CT). */
+  checkin_hour_ct: number
   last_checkin_at: string | null
   notes: string | null
   created_at: string

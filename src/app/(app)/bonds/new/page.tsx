@@ -27,6 +27,7 @@ interface DefendantForm {
   phone: string
   address: string
   checkinFrequency: CheckinFrequency
+  checkinHourCt: number
 }
 
 interface BondForm {
@@ -73,6 +74,13 @@ const initialDefendant: DefendantForm = {
   phone: '',
   address: '',
   checkinFrequency: 'weekly',
+  checkinHourCt: 8,
+}
+
+const CHECKIN_HOUR_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 6) // 6 AM–9 PM CT
+function fmtHour(h: number): string {
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  return `${h % 12 || 12}:00 ${ampm} CT`
 }
 
 const initialBond: BondForm = {
@@ -389,6 +397,18 @@ function StepDefendant({
               <option value="weekly">Weekly</option>
               <option value="daily">Daily</option>
               <option value="custom">Custom</option>
+            </select>
+          </Field>
+          <Field>
+            <Label>Check-in Reminder Time (CT)</Label>
+            <select
+              value={form.checkinHourCt}
+              onChange={(e) => setForm({ ...form, checkinHourCt: Number(e.target.value) })}
+              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
+            >
+              {CHECKIN_HOUR_OPTIONS.map((h) => (
+                <option key={h} value={h}>{fmtHour(h)}</option>
+              ))}
             </select>
           </Field>
         </div>
@@ -875,6 +895,7 @@ export default function NewBondPage() {
           phone: defendant.phone,
           address: defendant.address,
           checkinFrequency: defendant.checkinFrequency,
+          checkinHourCt: defendant.checkinHourCt,
         },
         bond: {
           bondAmount: parseFloat(bond.bondAmount) || 0,

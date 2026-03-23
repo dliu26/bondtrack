@@ -47,6 +47,16 @@ function InputField({
 
 const FREQUENCY_LABELS = { daily: 'Daily', weekly: 'Weekly', custom: 'Custom' }
 
+/** Format hour (0-23) as "8:00 AM CT" */
+function fmtHour(h: number): string {
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${h12}:00 ${ampm} CT`
+}
+
+/** Options for the check-in time picker (6 AM – 9 PM CT) */
+const CHECKIN_HOUR_OPTIONS = Array.from({ length: 16 }, (_, i) => i + 6) // 6–21
+
 export default function DefendantInfoCard({ defendant }: { defendant: Defendant }) {
   const [editing, setEditing] = useState(false)
   const [saving, startSave] = useTransition()
@@ -60,6 +70,7 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
     phone: defendant.phone ?? '',
     address: defendant.address ?? '',
     checkinFrequency: defendant.checkin_frequency,
+    checkinHourCt: defendant.checkin_hour_ct ?? 8,
   })
 
   function handleCancel() {
@@ -70,8 +81,10 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
       phone: defendant.phone ?? '',
       address: defendant.address ?? '',
       checkinFrequency: defendant.checkin_frequency,
+      checkinHourCt: defendant.checkin_hour_ct ?? 8,
     })
     setError(null)
+    setFieldErrors({})
     setEditing(false)
   }
 
@@ -138,6 +151,18 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
               <option value="custom">Custom</option>
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Check-in Reminder Time (CT)</label>
+            <select
+              value={form.checkinHourCt}
+              onChange={(e) => setForm({ ...form, checkinHourCt: Number(e.target.value) })}
+              className="w-full px-3 py-2.5 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
+            >
+              {CHECKIN_HOUR_OPTIONS.map((h) => (
+                <option key={h} value={h}>{fmtHour(h)}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {error && (
@@ -172,7 +197,9 @@ export default function DefendantInfoCard({ defendant }: { defendant: Defendant 
             {defendant.first_name} {defendant.last_name}
           </h1>
           <p className="text-gray-500 mt-1">
-            Check-in frequency: <span className="font-medium text-gray-700">{FREQUENCY_LABELS[defendant.checkin_frequency]}</span>
+            Check-in: <span className="font-medium text-gray-700">{FREQUENCY_LABELS[defendant.checkin_frequency]}</span>
+            {' · '}
+            <span className="font-medium text-gray-700">{fmtHour(defendant.checkin_hour_ct ?? 8)}</span>
           </p>
         </div>
         <button

@@ -20,6 +20,7 @@ export async function updateDefendant(
     phone: string
     address: string
     checkinFrequency: CheckinFrequency
+    checkinHourCt: number
   }
 ) {
   const supabase = await createClient()
@@ -36,6 +37,8 @@ export async function updateDefendant(
     const err = validateDob(data.dob)
     if (err) return { error: err }
   }
+  const hour = Math.round(data.checkinHourCt)
+  if (hour < 0 || hour > 23) return { error: 'Invalid check-in hour.' }
 
   const { error } = await supabase
     .from('defendants')
@@ -46,6 +49,7 @@ export async function updateDefendant(
       phone: data.phone || null,
       address: data.address || null,
       checkin_frequency: data.checkinFrequency,
+      checkin_hour_ct: hour,
     })
     .eq('id', defendantId)
     .eq('bondsman_id', user.id)
@@ -210,6 +214,33 @@ export async function markCheckinConfirmed(defendantId: string) {
     .eq('id', defendantId)
 
   revalidate(defendantId)
+}
+
+/**
+ * Creates an in-app notification for the bondsman — used by Today's Focus
+ * "Confirm Ready" actions so the acknowledgement is recorded without
+ * writing anything to the defendant's notes field.
+ */
+export async function createDashboardNotification(bondId: string, message: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
+  // Verify the bond belongs to this bondsman
+  const { data: bond } = await supabase
+    .from('bonds')
+    .select('id')
+    .eq('id', bondId)
+    .eq('bondsman_id', user.id)
+    .single()
+  if (!bond) return { error: 'Bond not found.' }
+
+  await supabase.from('notifications').insert({
+    bondsman_id: user.id,
+    bond_id: bondId,
+    message,
+    type: 'court_change',
+  })
 }
 
 export async function logNote(defendantId: string, note: string) {

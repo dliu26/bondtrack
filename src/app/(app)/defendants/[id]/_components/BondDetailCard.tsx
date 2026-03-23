@@ -13,6 +13,7 @@ import { toast } from '@/lib/toast'
 import type { Bond, CourtDate, Payment, Cosigner, BondStatus, CourtDateStatus } from '@/types/database'
 import { getDaysToDate, getDaysOverdue } from '@/lib/urgency'
 import { formatDate } from '@/lib/date'
+import { sanitizeText } from '@/lib/sanitize'
 import PhoneButton from '@/components/PhoneButton'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -138,7 +139,7 @@ function CourtDateRow({
               </span>
             )}
           </div>
-          {cd.location && <p className="text-sm text-gray-500 mt-0.5">{cd.location}</p>}
+          {cd.location && <p className="text-sm text-gray-500 mt-0.5">{sanitizeText(cd.location)}</p>}
         </div>
       </div>
       {status === 'upcoming' && (
@@ -362,11 +363,11 @@ export default function BondDetailCard({
               <span className={clsx('text-sm font-semibold px-3 py-1 rounded-full', scfg.color)}>{scfg.label}</span>
             </div>
             <p className="text-gray-500 mt-1 text-base">
-              {[bond.charge, bond.county ? `${bond.county} County` : null, bond.court]
+              {[sanitizeText(bond.charge), bond.county ? `${sanitizeText(bond.county)} County` : null, sanitizeText(bond.court)]
                 .filter(Boolean).join(' · ')}
             </p>
             {bond.case_number && (
-              <p className="text-sm text-gray-400 mt-0.5">Case #{bond.case_number}</p>
+              <p className="text-sm text-gray-400 mt-0.5">Case #{sanitizeText(bond.case_number)}</p>
             )}
           </div>
 
@@ -468,9 +469,9 @@ export default function BondDetailCard({
                       variant="gray"
                     />
                   )}
-                  {cs.address && <span className="text-gray-400 text-sm">{cs.address}</span>}
+                  {cs.address && <span className="text-gray-400 text-sm">{sanitizeText(cs.address)}</span>}
                   {cs.assets_description && (
-                    <span className="text-gray-500 text-sm italic">Assets: {cs.assets_description}</span>
+                    <span className="text-gray-500 text-sm italic">Assets: {sanitizeText(cs.assets_description)}</span>
                   )}
                 </div>
               ))}

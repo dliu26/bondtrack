@@ -3,26 +3,42 @@
  *
  * Two actions controlled by ?action= query param:
  *
- *   action=send   (9 AM daily)
- *     — Find defendants whose check-in is due today.
- *     — Insert a pending checkin record.
+ *   action=send   (runs every hour via Vercel Cron)
+ *     — Find defendants whose preferred check-in hour (checkin_hour_ct) matches
+ *       the current hour in America/Chicago.
+ *     — Insert a pending checkin record for defendants who are due today.
  *
- *   action=missed  (1 PM daily)
+ *   action=missed  (1 PM CT / 19:00 UTC daily)
  *     — Find check-ins sent 4+ hours ago that are still pending.
  *     — Mark them missed, create a notification for the bondsman.
  *     — If 2+ consecutive missed check-ins, the dashboard urgency turns red
  *       (calculated at render time from the checkins table — no extra flag needed).
+ *
+ * SQL migration required:
+ *   alter table defendants
+ *     add column if not exists checkin_hour_ct int not null default 8
+ *       check (checkin_hour_ct >= 0 and checkin_hour_ct <= 23);
  */
 
 import { createServiceClient } from '@/lib/supabase/server'
 import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { subDays, subHours, startOfDay, endOfDay } from 'date-fns'
+import { CT_TZ } from '@/lib/date'
+
+// ── Current CT hour ────────────────────────────────────────────────────────────
+
+function currentHourCT(): number {
+  return Number(
+    new Date().toLocaleString('en-US', { timeZone: CT_TZ, hour: 'numeric', hour12: false })
+  )
+}
 
 // ── Send check-ins ────────────────────────────────────────────────────────────
 
 async function sendCheckIns() {
   const supabase = await createServiceClient()
   const now = new Date()
+  const ctHour = currentHourCT()
   const todayStart = startOfDay(now).toISOString()
   const todayEnd   = endOfDay(now).toISOString()
 
@@ -34,10 +50,12 @@ async function sendCheckIns() {
   const activeDefendantIds = [...new Set((activeBonds ?? []).map((b) => b.defendant_id))]
   if (activeDefendantIds.length === 0) return { sent: 0 }
 
+  // Only process defendants whose preferred CT hour matches the current CT hour
   const { data: defendants } = await supabase
     .from('defendants')
-    .select('id, first_name, checkin_frequency, last_checkin_at, bondsman_id')
+    .select('id, first_name, checkin_frequency, checkin_hour_ct, last_checkin_at, bondsman_id')
     .in('id', activeDefendantIds)
+    .eq('checkin_hour_ct', ctHour)
 
   let sent = 0
 
@@ -72,8 +90,8 @@ async function sendCheckIns() {
     sent++
   }
 
-  console.log(`[CHECKINS-SEND] Scheduled ${sent} check-ins`)
-  return { sent }
+  console.log(`[CHECKINS-SEND] CT hour ${ctHour} — scheduled ${sent} check-ins`)
+  return { sent, ctHour }
 }
 
 // ── Mark missed ───────────────────────────────────────────────────────────────
@@ -146,7 +164,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await sendCheckIns()
-    await logCron('checkins_send', 'success', `Scheduled ${result.sent} check-ins`, result.sent)
+    await logCron('checkins_send', 'success', `CT hour ${result.ctHour} — scheduled ${result.sent} check-ins`, result.sent)
     return Response.json({ ok: true, ...result })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Search, ChevronRight } from 'lucide-react'
 import { formatTimestamp } from '@/lib/date'
+import { sanitizeText } from '@/lib/sanitize'
 import clsx from 'clsx'
 
 const STATUS_CONFIG = {
@@ -88,8 +89,8 @@ export default function HistoryList({ bonds }: { bonds: ClosedBond[] }) {
                         {bond.defendant.first_name} {bond.defendant.last_name}
                       </h2>
                       <p className="text-sm text-gray-400 mt-0.5">
-                        {bond.charge ?? 'No charge listed'}
-                        {bond.county ? ` · ${bond.county} County` : ''}
+                        {sanitizeText(bond.charge) || 'No charge listed'}
+                        {bond.county ? ` · ${sanitizeText(bond.county)} County` : ''}
                       </p>
                     </div>
                     <div className="flex flex-col items-end gap-2 shrink-0">
@@ -103,7 +104,7 @@ export default function HistoryList({ bonds }: { bonds: ClosedBond[] }) {
                   {/* Meta */}
                   <div className="flex items-center justify-between text-sm text-gray-400">
                     <div className="flex items-center gap-3">
-                      {bond.case_number && <span>Case #{bond.case_number}</span>}
+                      {bond.case_number && <span>Case #{sanitizeText(bond.case_number)}</span>}
                       <span>Added {formatTimestamp(bond.created_at)}</span>
                     </div>
                     <span className="flex items-center gap-1 text-gray-400 group-hover:text-gray-600 transition-colors">

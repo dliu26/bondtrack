@@ -5,10 +5,13 @@ import Link from 'next/link'
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: '', email: '', message: '' })
+  const [honeypot, setHoneypot] = useState('')
   const [submitted, setSubmitted] = useState(false)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    // Honeypot: bots fill the hidden field; humans never see it
+    if (honeypot) return
     console.log('[ContactForm] Submitted:', form)
     setSubmitted(true)
   }
@@ -18,7 +21,7 @@ export default function ContactForm() {
       <div className="space-y-4">
         <div className="bg-green-50 border border-green-200 rounded-xl px-6 py-5 text-green-800">
           <p className="font-semibold text-lg">Message received</p>
-          <p className="text-sm mt-1">Thank you for reaching out. We'll get back to you shortly.</p>
+          <p className="text-sm mt-1">Thank you for reaching out. We&apos;ll get back to you shortly.</p>
         </div>
         <Link
           href="/"
@@ -32,6 +35,20 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Honeypot — hidden from real users; bots fill it and get silently rejected */}
+      <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', overflow: 'hidden' }}>
+        <label htmlFor="contact_url">Website</label>
+        <input
+          id="contact_url"
+          name="contact_url"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+        />
+      </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
         <input

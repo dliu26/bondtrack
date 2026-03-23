@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Calendar, CheckCircle2, AlertCircle, CreditCard, ChevronRight, Clock } from 'lucide-react'
 import clsx from 'clsx'
 import { formatDate } from '@/lib/date'
+import { sanitizeText } from '@/lib/sanitize'
 import type { ProcessedBond } from '@/types/database'
 
 const urgencyConfig = {
@@ -58,8 +59,8 @@ export default function BondCard({ bond }: { bond: ProcessedBond }) {
               {bond.defendant.firstName} {bond.defendant.lastName}
             </h2>
             <p className="text-gray-500 text-sm mt-0.5">
-              {bond.charge ?? 'No charge listed'}
-              {bond.county ? ` · ${bond.county} County` : ''}
+              {sanitizeText(bond.charge) || 'No charge listed'}
+              {bond.county ? ` · ${sanitizeText(bond.county)} County` : ''}
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">

@@ -20,6 +20,7 @@ export interface CreateBondInput {
     phone?: string
     address?: string
     checkinFrequency?: CheckinFrequency
+    checkinHourCt?: number
   }
   bond: {
     bondAmount: number
@@ -93,6 +94,7 @@ export async function createBond(input: CreateBondInput): Promise<{ error: strin
         phone: input.defendant.phone || null,
         address: input.defendant.address || null,
         checkin_frequency: input.defendant.checkinFrequency ?? 'weekly',
+        checkin_hour_ct: input.defendant.checkinHourCt ?? 8,
       })
       .select('id')
       .single()

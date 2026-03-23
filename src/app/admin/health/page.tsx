@@ -1,11 +1,12 @@
 /**
  * /admin/health — Cron Job Health Dashboard
  *
- * No auth required. Shows last run status and history for every cron job.
+ * Requires an authenticated session (redirects to /login otherwise).
  * Requires the cron_logs table (run the SQL in Supabase before deploying).
  */
 
-import { createServiceClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { format, formatDistanceToNow, addDays } from 'date-fns'
 import clsx from 'clsx'
 
@@ -49,6 +50,10 @@ interface CronLog {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default async function HealthPage() {
+  const authClient = await createClient()
+  const { data: { user } } = await authClient.auth.getUser()
+  if (!user) redirect('/login')
+
   const supabase = await createServiceClient()
   const now = new Date()
 

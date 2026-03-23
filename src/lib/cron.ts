@@ -2,11 +2,15 @@ import { createServiceClient } from '@/lib/supabase/server'
 
 /**
  * Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` on every invocation.
- * If CRON_SECRET is not set we allow the request (dev/local convenience).
+ * In production CRON_SECRET is required — missing secret = denied.
+ * In local dev (NODE_ENV !== 'production') we allow through if unset as a convenience.
  */
 export function verifyCronRequest(request: Request): boolean {
   const secret = process.env.CRON_SECRET
-  if (!secret) return true
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') return false
+    return true // local dev only
+  }
   const auth = request.headers.get('authorization')
   return auth === `Bearer ${secret}`
 }

@@ -11,7 +11,7 @@ import clsx from 'clsx'
 import PhoneButton from '@/components/PhoneButton'
 import { toast } from '@/lib/toast'
 import { todayKeyCT } from '@/lib/date'
-import { markCheckinConfirmed, logNote } from '@/app/(app)/defendants/[id]/actions'
+import { markCheckinConfirmed, logNote, createDashboardNotification } from '@/app/(app)/defendants/[id]/actions'
 import type { ProcessedBond } from '@/types/database'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -29,7 +29,8 @@ interface FocusItem {
     label: string
     phone?: string
     phoneName?: string
-    extra?: string
+    // confirm_ready: notification message to record (does NOT touch notes)
+    notificationMessage?: string
   }
 }
 
@@ -54,7 +55,7 @@ function buildFocusItems(bonds: ProcessedBond[]): FocusItem[] {
         defendantPhone: phone,
         issue: d <= 0 ? 'Forfeiture deadline has passed!' : `Forfeiture deadline in ${d} day${d === 1 ? '' : 's'}`,
         urgency: 'red',
-        action: { type: 'confirm_ready', label: 'Log Note', extra: 'forfeiture — reviewed today' },
+        action: { type: 'confirm_ready', label: 'Confirm Reviewed', notificationMessage: `Forfeiture deadline reviewed for ${name}` },
       })
     }
 
@@ -77,7 +78,7 @@ function buildFocusItems(bonds: ProcessedBond[]): FocusItem[] {
         defendantPhone: phone,
         issue,
         urgency,
-        action: { type: 'confirm_ready', label: 'Confirm Ready', extra: `${courtInfo} — confirmed ready` },
+        action: { type: 'confirm_ready', label: 'Confirm Ready', notificationMessage: `${name} confirmed ready for ${courtInfo}` },
       })
     }
 
@@ -120,7 +121,7 @@ function buildFocusItems(bonds: ProcessedBond[]): FocusItem[] {
         urgency,
         action: cosignerPhone
           ? { type: 'call_cosigner', label: 'Call Co-Signer', phone: cosignerPhone, phoneName: cosignerName ?? 'Co-Signer' }
-          : { type: 'confirm_ready', label: 'Log Note', extra: 'overdue payment reviewed' },
+          : { type: 'confirm_ready', label: 'Confirm Reviewed', notificationMessage: `Overdue payment reviewed for ${name}` },
       })
     }
   }
@@ -176,8 +177,8 @@ function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => voi
       result = await markCheckinConfirmed(item.defendantId)
       if (!result?.error) toast('Check-in recorded.', 'success')
     } else if (item.action.type === 'confirm_ready') {
-      const extra = item.action.extra ?? 'reviewed'
-      result = await logNote(item.defendantId, extra)
+      const msg = item.action.notificationMessage ?? 'Reviewed'
+      result = await createDashboardNotification(item.bondId, msg)
       if (!result?.error) toast('Confirmation logged.', 'success')
     } else if (item.action.type === 'flag_missing') {
       result = await logNote(item.defendantId, '⚠️ Flagged as potential skip — follow up immediately')
