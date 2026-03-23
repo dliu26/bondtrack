@@ -23,22 +23,12 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { verifyCronRequest, unauthorizedResponse, logCron } from '@/lib/cron'
 import { subDays, subHours, startOfDay, endOfDay } from 'date-fns'
-import { CT_TZ } from '@/lib/date'
-
-// ── Current CT hour ────────────────────────────────────────────────────────────
-
-function currentHourCT(): number {
-  return Number(
-    new Date().toLocaleString('en-US', { timeZone: CT_TZ, hour: 'numeric', hour12: false })
-  )
-}
 
 // ── Send check-ins ────────────────────────────────────────────────────────────
 
 async function sendCheckIns() {
   const supabase = await createServiceClient()
   const now = new Date()
-  const ctHour = currentHourCT()
   const todayStart = startOfDay(now).toISOString()
   const todayEnd   = endOfDay(now).toISOString()
 
@@ -50,12 +40,11 @@ async function sendCheckIns() {
   const activeDefendantIds = [...new Set((activeBonds ?? []).map((b) => b.defendant_id))]
   if (activeDefendantIds.length === 0) return { sent: 0 }
 
-  // Only process defendants whose preferred CT hour matches the current CT hour
+  // Process all defendants regardless of preferred check-in hour
   const { data: defendants } = await supabase
     .from('defendants')
-    .select('id, first_name, checkin_frequency, checkin_hour_ct, last_checkin_at, bondsman_id')
+    .select('id, first_name, checkin_frequency, last_checkin_at, bondsman_id')
     .in('id', activeDefendantIds)
-    .eq('checkin_hour_ct', ctHour)
 
   let sent = 0
 
@@ -90,8 +79,8 @@ async function sendCheckIns() {
     sent++
   }
 
-  console.log(`[CHECKINS-SEND] CT hour ${ctHour} — scheduled ${sent} check-ins`)
-  return { sent, ctHour }
+  console.log(`[CHECKINS-SEND] Scheduled ${sent} check-ins`)
+  return { sent }
 }
 
 // ── Mark missed ───────────────────────────────────────────────────────────────
@@ -164,7 +153,7 @@ export async function GET(request: Request) {
 
   try {
     const result = await sendCheckIns()
-    await logCron('checkins_send', 'success', `CT hour ${result.ctHour} — scheduled ${result.sent} check-ins`, result.sent)
+    await logCron('checkins_send', 'success', `Scheduled ${result.sent} check-ins`, result.sent)
     return Response.json({ ok: true, ...result })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
