@@ -26,7 +26,7 @@ export default function PrivacyPage() {
       <main className="flex-1 px-6 py-12 md:py-16">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mb-10">Last Updated: April 2026</p>
+          <p className="text-sm text-gray-500 mb-10">Last Updated: April 2, 2026</p>
 
           <div className="space-y-7 text-gray-700 leading-relaxed">
 
@@ -52,12 +52,14 @@ export default function PrivacyPage() {
               <p>
                 You can delete your account and all associated data at any time from the Settings page, or by
                 emailing{' '}
-                <a href="mailto:support@bondtrack.app" className="text-[#0f1e3c] font-medium hover:underline">
-                  support@bondtrack.app
+                <a href="mailto:info@mybondtrack.com" className="text-[#0f1e3c] font-medium hover:underline">
+                  info@mybondtrack.com
                 </a>
                 . We delete everything within 30 days. We use{' '}
-                <span className="font-medium">Supabase</span> for storage and{' '}
-                <span className="font-medium">Vercel</span> for hosting.
+                <span className="font-medium">Supabase</span> for storage,{' '}
+                <span className="font-medium">Vercel</span> for hosting, and{' '}
+                <span className="font-medium">Anthropic&rsquo;s Claude API</span> to generate your daily AI
+                briefing. Prompts are processed but not stored by Anthropic.
               </p>
             </section>
 
