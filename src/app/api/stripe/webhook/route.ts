@@ -28,8 +28,10 @@ export async function POST(req: Request) {
       if (!userId || !session.subscription) break
 
       const subscription = await stripe.subscriptions.retrieve(
-        session.subscription as string
+        session.subscription as string,
+        { expand: ['items'] }
       )
+      const periodEnd = subscription.items.data[0]?.current_period_end
 
       await supabase.from('subscriptions').upsert(
         {
@@ -37,9 +39,9 @@ export async function POST(req: Request) {
           stripe_customer_id: session.customer as string,
           stripe_subscription_id: subscription.id,
           status: 'active',
-          current_period_end: new Date(
-            subscription.current_period_end * 1000
-          ).toISOString(),
+          current_period_end: periodEnd
+            ? new Date(periodEnd * 1000).toISOString()
+            : null,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'user_id' }
