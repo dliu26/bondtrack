@@ -32,10 +32,11 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const publicPaths = ['/', '/login', '/privacy', '/terms']
+  const publicPaths = ['/', '/login', '/pricing', '/privacy', '/terms']
+  const publicApiPaths = ['/api/stripe/checkout', '/api/stripe/webhook']
 
   // Unauthenticated user trying to access protected route
-  if (!user && !publicPaths.includes(pathname)) {
+  if (!user && !publicPaths.includes(pathname) && !publicApiPaths.includes(pathname)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)

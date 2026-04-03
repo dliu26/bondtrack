@@ -50,16 +50,22 @@ export default function PrivacyPage() {
             <section>
               <h2 className="text-lg font-semibold text-gray-900 mb-1.5">Your data</h2>
               <p>
-                You can delete your account and all associated data at any time from the Settings page, or by
-                emailing{' '}
+                You can request deletion of your account and all associated data at any time by emailing{' '}
                 <a href="mailto:info@mybondtrack.com" className="text-[#0f1e3c] font-medium hover:underline">
                   info@mybondtrack.com
                 </a>
-                . We delete everything within 30 days. We use{' '}
-                <span className="font-medium">Supabase</span> for storage,{' '}
-                <span className="font-medium">Vercel</span> for hosting, and{' '}
-                <span className="font-medium">Anthropic&rsquo;s Claude API</span> to generate your daily AI
-                briefing. Prompts are processed but not stored by Anthropic.
+                . We will process deletion requests within 30 days. We use Supabase for storage, Vercel for
+                hosting, and AI to generate your daily briefing summaries.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1.5">Contact</h2>
+              <p>
+                Questions about this policy? Email{' '}
+                <a href="mailto:info@mybondtrack.com" className="text-[#0f1e3c] font-medium hover:underline">
+                  info@mybondtrack.com
+                </a>
               </p>
             </section>
 

@@ -52,7 +52,7 @@ export async function getSettings(): Promise<BondsmanSettings | null> {
 
   const { data } = await supabase
     .from('bondsman_settings')
-    .select('*')
+    .select('name, phone, agency_name, show_daily_list, default_checkin_frequency, default_county, default_court')
     .eq('bondsman_id', user.id)
     .single()
 
@@ -157,8 +157,65 @@ export async function deleteAccount(confirmation: string): Promise<{ error?: str
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
+  const userId = user.id
+
+  // Explicitly delete all user data before removing the auth user.
+  // Some tables have cascade deletes configured but we delete explicitly
+  // to ensure complete cleanup regardless of DB cascade configuration.
+
+  // 1. Get all bond IDs for this user so we can delete child records
+  const { data: bonds } = await supabase
+    .from('bonds')
+    .select('id, defendant_id')
+    .eq('bondsman_id', userId)
+
+  const bondIds = (bonds ?? []).map((b: { id: string }) => b.id)
+  const defendantIds = [
+    ...new Set((bonds ?? []).map((b: { defendant_id: string }) => b.defendant_id).filter(Boolean)),
+  ]
+
+  // 2. Delete bond-level child records
+  if (bondIds.length > 0) {
+    await supabase.from('cosigners').delete().in('bond_id', bondIds)
+    await supabase.from('court_dates').delete().in('bond_id', bondIds)
+    await supabase.from('payments').delete().in('bond_id', bondIds)
+  }
+
+  // 3. Delete defendant-level child records
+  if (defendantIds.length > 0) {
+    await supabase.from('checkins').delete().in('defendant_id', defendantIds)
+    await supabase.from('call_logs').delete().in('defendant_id', defendantIds)
+    await supabase.from('notes').delete().in('defendant_id', defendantIds)
+  }
+
+  // 4. Delete bonds (after child records)
+  if (bondIds.length > 0) {
+    await supabase.from('bonds').delete().in('id', bondIds)
+  }
+
+  // 5. Delete defendants
+  if (defendantIds.length > 0) {
+    await supabase.from('defendants').delete().in('id', defendantIds)
+  }
+
+  // 6. Delete notifications for this user (by bondsman_id or user_id column)
+  await supabase.from('notifications').delete().eq('bondsman_id', userId)
+
+  // 7. Delete bondsman-level call_logs / notes that are keyed by bondsman_id
+  await supabase.from('call_logs').delete().eq('bondsman_id', userId)
+  await supabase.from('notes').delete().eq('bondsman_id', userId)
+
+  // 8. Delete settings and subscription (both have cascade but being explicit)
+  await supabase.from('bondsman_settings').delete().eq('bondsman_id', userId)
+  await supabase.from('subscriptions').delete().eq('user_id', userId)
+
+  // 9. Sign out before deleting the auth user so cookies are cleared
+  await supabase.auth.signOut()
+
+  // 10. Delete the auth user via service role (cascade removes remaining auth refs)
   const serviceClient = await createServiceClient()
-  const { error } = await serviceClient.auth.admin.deleteUser(user.id)
+  const { error } = await serviceClient.auth.admin.deleteUser(userId)
   if (error) return { error: error.message }
+
   return {}
 }

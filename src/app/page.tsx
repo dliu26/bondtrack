@@ -94,7 +94,7 @@ export default async function RootPage() {
             Sign In
           </Link>
           <Link
-            href="/login"
+            href="/pricing"
             className="bg-white text-[#0f1e3c] text-sm font-semibold px-4 py-2 rounded-lg hover:bg-white/90 transition-colors active:scale-95 duration-75"
           >
             Get Started Free
@@ -130,7 +130,7 @@ export default async function RootPage() {
         </p>
 
         <Link
-          href="/login"
+          href="/pricing"
           className="relative mt-10 inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors active:scale-95 duration-75"
         >
           Get Started Free — No Credit Card Required
@@ -254,7 +254,7 @@ export default async function RootPage() {
             <div className="text-center mb-8">
               <span className="text-5xl font-bold text-white">$79</span>
               <span className="text-white/50 text-lg ml-2">/ month</span>
-              <p className="text-white/40 text-sm mt-2">No setup fees. Cancel anytime.</p>
+              <p className="text-white/40 text-sm mt-2">No setup fees. Cancel with 30 days notice.</p>
             </div>
 
             <ul className="space-y-3 mb-8">
@@ -267,7 +267,7 @@ export default async function RootPage() {
             </ul>
 
             <Link
-              href="/login"
+              href="/pricing"
               className="block w-full text-center bg-indigo-500 hover:bg-indigo-400 text-white font-semibold py-3.5 rounded-xl transition-colors active:scale-95 duration-75"
             >
               Start Free Trial

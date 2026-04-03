@@ -56,12 +56,55 @@ function StatCard({
   )
 }
 
+function SubscriptionBanner({ subscription }: { subscription: { status: string } | null }) {
+  if (!subscription) {
+    return (
+      <div className="bg-amber-900/30 border border-amber-500/30 rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-4">
+        <p className="text-amber-300 text-sm">
+          Start your free 30-day trial to unlock BondTrack
+        </p>
+        <Link
+          href="/pricing"
+          className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+        >
+          Start Free Trial
+        </Link>
+      </div>
+    )
+  }
+
+  if (subscription.status === 'past_due') {
+    return (
+      <div className="bg-amber-900/30 border border-amber-500/30 rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-4">
+        <p className="text-amber-300 text-sm">
+          Your payment failed. Update your billing to keep access.
+        </p>
+        <Link
+          href="/pricing"
+          className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+        >
+          Update Billing
+        </Link>
+      </div>
+    )
+  }
+
+  return null
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const subRes = await supabase
+    .from('subscriptions')
+    .select('status')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  const subscription = subRes.data
 
   // ── 1. Parallel: active bonds + settings + closed count ───────────────
   const [bondsRes, settingsRes, closedCountRes] = await Promise.all([
@@ -96,6 +139,7 @@ export default async function DashboardPage() {
         closedCount={closedCount}
         greeting={greeting}
         firstName={firstName}
+        subscription={subscription}
       />
     )
   }
@@ -244,6 +288,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-4 py-4 md:px-8 md:py-8 max-w-4xl">
+      <SubscriptionBanner subscription={subscription} />
       <DismissibleBanner />
 
       {/* Page header */}
@@ -323,13 +368,16 @@ function EmptyDashboard({
   closedCount,
   greeting,
   firstName,
+  subscription,
 }: {
   closedCount: number
   greeting: string
   firstName: string | null
+  subscription: { status: string } | null
 }) {
   return (
     <div className="px-4 py-4 md:px-8 md:py-8 max-w-4xl">
+      <SubscriptionBanner subscription={subscription} />
       <DismissibleBanner />
 
       {/* Page header */}

@@ -238,6 +238,49 @@ function DefaultsSection({ settings }: { settings: BondsmanSettings | null }) {
   )
 }
 
+// ── Delete confirmation modal ──────────────────────────────────────────────────
+
+function DeleteConfirmModal({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60"
+        onClick={onCancel}
+      />
+      {/* Dialog */}
+      <div className="relative bg-[#1a2d4f] border border-white/10 rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-4">
+        <h3 className="text-lg font-semibold text-white">Delete Account?</h3>
+        <p className="text-sm text-slate-300 leading-relaxed">
+          Are you sure? This permanently deletes all your bonds, defendants, and data. This cannot be undone.
+        </p>
+        <div className="flex gap-3 pt-1">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-white/10 text-sm font-medium text-white hover:bg-white/10 transition-colors min-h-[44px]"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2.5 rounded-xl bg-red-600 text-sm font-medium text-white hover:bg-red-700 transition-colors active:scale-95 duration-75 min-h-[44px]"
+          >
+            Yes, Delete Everything
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Account section ───────────────────────────────────────────────────────────
 
 function AccountSection() {
@@ -253,6 +296,7 @@ function AccountSection() {
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   async function handleChangePassword() {
     setPasswordError('')
@@ -283,6 +327,16 @@ function AccountSection() {
 
   return (
     <div className="space-y-4">
+      {showDeleteModal && (
+        <DeleteConfirmModal
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            setShowDeleteModal(false)
+            handleDeleteAccount()
+          }}
+        />
+      )}
+
       {/* Change password */}
       <Section title="Change Password">
         <FieldGroup label="New Password" error={passwordError}>
@@ -342,7 +396,7 @@ function AccountSection() {
             />
           </FieldGroup>
           <button
-            onClick={handleDeleteAccount}
+            onClick={() => setShowDeleteModal(true)}
             disabled={deleteBusy || deleteConfirm !== 'DELETE'}
             className="flex items-center gap-2 bg-red-600 text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-red-700 transition-colors active:scale-95 duration-75 disabled:opacity-40 min-h-[44px]"
           >
