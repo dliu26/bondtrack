@@ -60,9 +60,9 @@ export default function NotificationsList({
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-2">
+      <div className="flex items-center justify-between gap-3 pb-6 mb-2 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Notifications</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Notifications</h1>
           {unreadCount > 0 && (
             <span className="bg-red-500 text-white text-sm font-bold px-2.5 py-0.5 rounded-full">
               {unreadCount} unread
@@ -81,7 +81,7 @@ export default function NotificationsList({
           </button>
         )}
       </div>
-      <p className="text-sm text-gray-400 mb-6">
+      <p className="text-sm text-gray-400 mt-3 mb-6">
         Notification delivery is not guaranteed. Always verify critical deadlines independently.
       </p>
 

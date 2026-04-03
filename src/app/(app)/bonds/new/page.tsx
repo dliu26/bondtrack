@@ -178,12 +178,12 @@ function ProgressBar({ current }: { current: number }) {
               {/* Dot */}
               <div
                 className={clsx(
-                  'relative z-10 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors',
+                  'relative z-10 rounded-full flex items-center justify-center font-bold transition-all',
                   done
-                    ? 'bg-[#0f1e3c] text-white'
+                    ? 'w-8 h-8 text-sm bg-[#0f1e3c] text-white'
                     : active
-                    ? 'bg-[#0f1e3c] text-white ring-4 ring-blue-100'
-                    : 'bg-gray-200 text-gray-400'
+                    ? 'w-10 h-10 text-base bg-[#0f1e3c] text-white ring-4 ring-[#0f1e3c]/20 shadow-md'
+                    : 'w-8 h-8 text-sm bg-gray-200 text-gray-400'
                 )}
               >
                 {done ? <Check className="w-4 h-4" /> : i + 1}
@@ -937,7 +937,7 @@ export default function NewBondPage() {
           <ChevronLeft className="w-4 h-4" />
           Back
         </button>
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Add New Bond</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Add New Bond</h1>
       </div>
 
       {/* Progress */}
@@ -987,7 +987,7 @@ export default function NewBondPage() {
             type="button"
             onClick={next}
             disabled={!proceed}
-            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-6 py-3 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors min-h-[44px] disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors min-h-[48px] disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
           >
             Next Step
             <ChevronRight className="w-4 h-4" />
