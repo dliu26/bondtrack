@@ -147,7 +147,6 @@ function saveHandled(keys: Set<string>) {
 }
 
 // ── Action button — logs a specific action to the server ───────────────────────
-// Visually: primary solid-color button with icon. Purpose: record what you did.
 
 function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => void }) {
   const [busy, setBusy] = useState(false)
@@ -202,7 +201,7 @@ function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => voi
         'transition-colors active:scale-95 duration-75 disabled:opacity-40 whitespace-nowrap',
         item.urgency === 'red'
           ? 'bg-red-600 text-white hover:bg-red-700'
-          : 'bg-[#0f1e3c] text-white hover:bg-[#1a2f5a]'
+          : 'bg-blue-600 text-white hover:bg-blue-700'
       )}
     >
       <Icon className="w-3.5 h-3.5 shrink-0" />
@@ -212,11 +211,9 @@ function ItemActionButton({ item, onDone }: { item: FocusItem; onDone: () => voi
 }
 
 // ── Done checkbox — UI-only toggle to mark item as handled for today ───────────
-// Visually: outlined toggle with square checkbox + "Done" label. No server call.
 
 function DoneCheckbox({
   handled,
-  urgency,
   onToggle,
 }: {
   handled: boolean
@@ -230,13 +227,8 @@ function DoneCheckbox({
       className={clsx(
         'shrink-0 inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2.5 rounded-xl min-h-[44px] transition-colors',
         handled
-          ? 'bg-green-50 border border-green-200 text-green-700'
-          : clsx(
-              'border text-gray-400 hover:text-green-600',
-              urgency === 'red'
-                ? 'border-red-200 hover:border-green-300 hover:bg-green-50'
-                : 'border-yellow-200 hover:border-green-300 hover:bg-green-50'
-            )
+          ? 'bg-green-900/30 border border-green-500/30 text-green-400'
+          : 'border border-white/20 text-slate-400 hover:bg-white/10 hover:text-white'
       )}
     >
       <div className={clsx(
@@ -264,7 +256,7 @@ function FocusItemRow({
   return (
     <div
       className={clsx(
-        'flex items-center gap-3 py-3.5 border-b border-gray-100 last:border-0',
+        'flex items-center gap-3 py-3.5 border-b border-white/10 last:border-0',
         handled && 'opacity-50'
       )}
     >
@@ -273,7 +265,7 @@ function FocusItemRow({
         <div className="flex items-center gap-2 flex-wrap">
           <Link
             href={`/defendants/${item.defendantId}`}
-            className="font-bold text-gray-900 text-base hover:underline"
+            className="font-bold text-white text-base hover:underline"
           >
             {item.defendantName}
           </Link>
@@ -287,7 +279,7 @@ function FocusItemRow({
         </div>
         <p className={clsx(
           'text-base mt-0.5',
-          item.urgency === 'red' ? 'text-red-700' : 'text-yellow-700'
+          item.urgency === 'red' ? 'text-red-400' : 'text-amber-300'
         )}>
           {item.issue}
         </p>
@@ -374,11 +366,11 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
 
   if (totalActions === 0 && handledItems.length === 0) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-2xl p-6 mb-6 flex items-center gap-4">
-        <CheckCircle2 className="w-8 h-8 text-green-500 shrink-0" />
+      <div className="bg-green-900/30 border border-green-500/30 rounded-2xl p-6 mb-6 flex items-center gap-4">
+        <CheckCircle2 className="w-8 h-8 text-green-400 shrink-0" />
         <div>
-          <p className="text-lg font-bold text-green-800">All clear today.</p>
-          <p className="text-green-700 text-base">No urgent items. Your portfolio is on track.</p>
+          <p className="text-lg font-bold text-green-300">All clear today.</p>
+          <p className="text-green-400 text-base">No urgent items. Your portfolio is on track.</p>
         </div>
       </div>
     )
@@ -386,18 +378,18 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
 
   return (
     <div className="mb-8 space-y-3">
-      <h2 className="text-xl font-bold text-gray-900">Today&apos;s Focus</h2>
+      <h2 className="text-xl font-bold text-white">Today&apos;s Focus</h2>
 
       {/* Needs Action Today — red */}
       {activeRedItems.length > 0 && (
-        <div className="rounded-xl border border-red-200 overflow-hidden">
+        <div className="rounded-xl border border-red-500/30 overflow-hidden">
           <SectionHeader
             label="Needs Action Today"
             count={activeRedItems.length}
-            color="bg-red-50 text-red-800"
+            color="bg-red-900/30 text-red-300"
             icon={AlertCircle}
           />
-          <div className="bg-white divide-y divide-gray-100 px-4">
+          <div className="bg-[#1a2d4f] divide-y divide-white/10 px-4">
             {activeRedItems.map((item) => (
               <FocusItemRow
                 key={item.key}
@@ -412,14 +404,14 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
 
       {/* This Week — yellow */}
       {activeYellowItems.length > 0 && (
-        <div className="rounded-xl border border-yellow-200 overflow-hidden">
+        <div className="rounded-xl border border-amber-500/30 overflow-hidden">
           <SectionHeader
             label="This Week"
             count={activeYellowItems.length}
-            color="bg-yellow-50 text-yellow-800"
+            color="bg-amber-900/30 text-amber-300"
             icon={Clock}
           />
-          <div className="bg-white divide-y divide-gray-100 px-4">
+          <div className="bg-[#1a2d4f] divide-y divide-white/10 px-4">
             {activeYellowItems.map((item) => (
               <FocusItemRow
                 key={item.key}
@@ -434,10 +426,10 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
 
       {/* On Track — green, collapsed by default */}
       {onTrackBonds.length > 0 && (
-        <div className="rounded-xl border border-green-200 overflow-hidden">
+        <div className="rounded-xl border border-green-500/30 overflow-hidden">
           <button
             onClick={() => setGreenOpen((v) => !v)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 bg-green-50 text-green-800 hover:bg-green-100 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 bg-green-900/30 text-green-300 hover:bg-green-900/40 transition-colors"
           >
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span className="font-bold text-base flex-1 text-left">On Track</span>
@@ -445,17 +437,17 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
             {greenOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {greenOpen && (
-            <div className="bg-white divide-y divide-gray-100 px-4">
+            <div className="bg-[#1a2d4f] divide-y divide-white/10 px-4">
               {onTrackBonds.map((bond) => (
                 <div key={bond.id} className="flex items-center gap-3 py-3.5">
                   <CheckCircle2 className="w-5 h-5 text-green-400 shrink-0" />
                   <Link
                     href={`/defendants/${bond.defendant.id}`}
-                    className="flex-1 font-semibold text-gray-700 hover:underline"
+                    className="flex-1 font-semibold text-slate-300 hover:text-white hover:underline"
                   >
                     {bond.defendant.firstName} {bond.defendant.lastName}
                   </Link>
-                  <span className="text-sm text-gray-400">${bond.bondAmount.toLocaleString()}</span>
+                  <span className="text-sm text-slate-500">${bond.bondAmount.toLocaleString()}</span>
                 </div>
               ))}
             </div>
@@ -465,10 +457,10 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
 
       {/* Handled Today — auto-collapsed */}
       {handledItems.length > 0 && (
-        <div className="rounded-xl border border-gray-200 overflow-hidden">
+        <div className="rounded-xl border border-white/10 overflow-hidden">
           <button
             onClick={() => setHandledOpen((v) => !v)}
-            className="w-full flex items-center gap-2 px-4 py-2.5 bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2.5 bg-white/5 text-slate-400 hover:bg-white/10 transition-colors"
           >
             <Check className="w-4 h-4 shrink-0" />
             <span className="font-semibold text-base flex-1 text-left">Handled Today</span>
@@ -476,7 +468,7 @@ export default function TodaysFocus({ bonds }: { bonds: ProcessedBond[] }) {
             {handledOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {handledOpen && (
-            <div className="bg-white divide-y divide-gray-100 px-4">
+            <div className="bg-[#1a2d4f] divide-y divide-white/10 px-4">
               {handledItems.map((item) => (
                 <FocusItemRow
                   key={item.key}

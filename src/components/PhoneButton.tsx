@@ -94,8 +94,8 @@ export default function PhoneButton({
             ? 'px-4 py-2.5 rounded-xl min-h-[44px] text-base'
             : 'w-10 h-10 rounded-full justify-center shrink-0',
           variant === 'green'
-            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200',
+            ? 'bg-green-900/40 text-green-400 hover:bg-green-900/60'
+            : 'bg-white/10 text-slate-300 hover:bg-white/20',
           className
         )}
       >
@@ -104,35 +104,35 @@ export default function PhoneButton({
       </a>
 
       {showPrompt && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
-            <p className="text-xl font-bold text-gray-900 mb-1">How did it go?</p>
-            <p className="text-gray-500 text-base mb-6">
-              Call with <span className="font-medium text-gray-700">{pendingCall?.calledName}</span>
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-[#1a2d4f] rounded-2xl shadow-xl border border-white/10 w-full max-w-sm p-6">
+            <p className="text-xl font-bold text-white mb-1">How did it go?</p>
+            <p className="text-slate-400 text-base mb-6">
+              Call with <span className="font-medium text-white">{pendingCall?.calledName}</span>
             </p>
             <div className="space-y-3">
               <button
                 onClick={() => handleOutcome('reached')}
-                className="w-full py-4 rounded-xl bg-green-100 text-green-800 font-bold text-lg hover:bg-green-200 transition-colors active:scale-95 duration-75"
+                className="w-full py-4 rounded-xl bg-green-900/40 text-green-300 font-bold text-lg hover:bg-green-900/60 transition-colors active:scale-95 duration-75"
               >
                 Reached them ✓
               </button>
               <button
                 onClick={() => handleOutcome('no_answer')}
-                className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-bold text-lg hover:bg-gray-200 transition-colors active:scale-95 duration-75"
+                className="w-full py-4 rounded-xl bg-white/10 text-slate-300 font-bold text-lg hover:bg-white/20 transition-colors active:scale-95 duration-75"
               >
                 No answer
               </button>
               <button
                 onClick={() => handleOutcome('voicemail')}
-                className="w-full py-4 rounded-xl bg-gray-100 text-gray-700 font-bold text-lg hover:bg-gray-200 transition-colors active:scale-95 duration-75"
+                className="w-full py-4 rounded-xl bg-white/10 text-slate-300 font-bold text-lg hover:bg-white/20 transition-colors active:scale-95 duration-75"
               >
                 Left voicemail
               </button>
             </div>
             <button
               onClick={dismiss}
-              className="w-full mt-4 py-2.5 text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              className="w-full mt-4 py-2.5 text-sm text-slate-500 hover:text-slate-300 transition-colors"
             >
               Skip — don&apos;t log this call
             </button>

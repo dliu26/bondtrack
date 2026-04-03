@@ -40,16 +40,16 @@ export default async function BondHistoryPage() {
       <div className="mb-6">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-4 transition-colors"
+          className="inline-flex items-center gap-1 text-slate-400 hover:text-white text-base mb-4 transition-colors"
         >
           <ChevronLeft className="w-4 h-4" />
           Back to Dashboard
         </Link>
         <div className="flex items-baseline justify-between">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Bond History</h1>
-          <span className="text-gray-400 text-sm">{bonds.length} bond{bonds.length !== 1 ? 's' : ''}</span>
+          <h1 className="text-2xl md:text-3xl font-bold text-white">Bond History</h1>
+          <span className="text-slate-400 text-sm">{bonds.length} bond{bonds.length !== 1 ? 's' : ''}</span>
         </div>
-        <p className="text-gray-500 mt-1">Exonerated, forfeited, and closed bonds.</p>
+        <p className="text-slate-400 mt-1">Exonerated, forfeited, and closed bonds.</p>
       </div>
 
       <HistoryList bonds={bonds} />

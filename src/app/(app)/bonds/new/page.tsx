@@ -100,11 +100,13 @@ const emptyCosigner = (): CosignerForm => ({
 
 // ── Small helpers ──────────────────────────────────────────────────────────────
 
+const inputCls = 'w-full px-4 py-3 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent'
+
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
-    <label className="block text-base font-medium text-gray-700 mb-1.5">
+    <label className="block text-base font-medium text-slate-300 mb-1.5">
       {children}
-      {required && <span className="text-red-500 ml-1">*</span>}
+      {required && <span className="text-red-400 ml-1">*</span>}
     </label>
   )
 }
@@ -131,11 +133,7 @@ function Input({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       required={required}
-      className={clsx(
-        'w-full px-4 py-3 text-lg border border-gray-300 rounded-xl',
-        'focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] focus:border-transparent',
-        className
-      )}
+      className={clsx(inputCls, className)}
     />
   )
 }
@@ -150,7 +148,7 @@ function Field({ children }: { children: React.ReactNode }) {
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null
-  return <p className="mt-1 text-sm text-red-600">{message}</p>
+  return <p className="mt-1 text-sm text-red-400">{message}</p>
 }
 
 // ── Progress bar ───────────────────────────────────────────────────────────────
@@ -171,7 +169,7 @@ function ProgressBar({ current }: { current: number }) {
                 <div
                   className={clsx(
                     'absolute top-4 left-1/2 w-full h-0.5 -z-0',
-                    done ? 'bg-[#0f1e3c]' : 'bg-gray-200'
+                    done ? 'bg-blue-500' : 'bg-white/10'
                   )}
                 />
               )}
@@ -180,10 +178,10 @@ function ProgressBar({ current }: { current: number }) {
                 className={clsx(
                   'relative z-10 rounded-full flex items-center justify-center font-bold transition-all',
                   done
-                    ? 'w-8 h-8 text-sm bg-[#0f1e3c] text-white'
+                    ? 'w-8 h-8 text-sm bg-blue-600 text-white'
                     : active
-                    ? 'w-10 h-10 text-base bg-[#0f1e3c] text-white ring-4 ring-[#0f1e3c]/20 shadow-md'
-                    : 'w-8 h-8 text-sm bg-gray-200 text-gray-400'
+                    ? 'w-10 h-10 text-base bg-blue-600 text-white ring-4 ring-blue-600/20 shadow-md'
+                    : 'w-8 h-8 text-sm bg-white/10 text-slate-400'
                 )}
               >
                 {done ? <Check className="w-4 h-4" /> : i + 1}
@@ -192,7 +190,7 @@ function ProgressBar({ current }: { current: number }) {
               <span
                 className={clsx(
                   'mt-2 text-xs font-medium text-center hidden sm:block',
-                  active ? 'text-[#0f1e3c]' : done ? 'text-gray-600' : 'text-gray-400'
+                  active ? 'text-white' : done ? 'text-slate-400' : 'text-slate-600'
                 )}
               >
                 {label}
@@ -256,12 +254,12 @@ function StepDefendant({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">Who is this bond for?</h2>
-        <p className="text-gray-500 text-base">Find an existing defendant or add a new one.</p>
+        <h2 className="text-2xl font-bold text-white mb-1">Who is this bond for?</h2>
+        <p className="text-slate-400 text-base">Find an existing defendant or add a new one.</p>
       </div>
 
       {/* Mode toggle */}
-      <div className="flex rounded-xl border border-gray-300 overflow-hidden">
+      <div className="flex rounded-xl border border-white/10 overflow-hidden">
         {(['search', 'new'] as const).map((m) => (
           <button
             key={m}
@@ -270,8 +268,8 @@ function StepDefendant({
             className={clsx(
               'flex-1 py-3 text-base font-medium transition-colors',
               form.mode === m
-                ? 'bg-[#0f1e3c] text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white/5 text-slate-400 hover:bg-white/10'
             )}
           >
             {m === 'search' ? 'Find Existing Defendant' : 'Add New Defendant'}
@@ -283,20 +281,20 @@ function StepDefendant({
         <div>
           {form.existingId ? (
             /* Selected defendant card */
-            <div className="flex items-center gap-4 p-4 bg-green-50 border border-green-300 rounded-xl">
-              <div className="w-10 h-10 rounded-full bg-[#0f1e3c] flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-4 p-4 bg-green-900/30 border border-green-500/30 rounded-xl">
+              <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="font-semibold text-gray-900 text-lg">{form.existingName}</p>
+                <p className="font-semibold text-white text-lg">{form.existingName}</p>
                 {form.existingPhone && (
-                  <p className="text-gray-500 text-sm">{form.existingPhone}</p>
+                  <p className="text-slate-400 text-sm">{form.existingPhone}</p>
                 )}
               </div>
               <button
                 type="button"
                 onClick={clearSelection}
-                className="text-gray-400 hover:text-gray-700 text-sm underline"
+                className="text-slate-400 hover:text-white text-sm underline"
               >
                 Change
               </button>
@@ -304,47 +302,47 @@ function StepDefendant({
           ) : (
             <div className="relative">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => handleSearch(e.target.value)}
                   placeholder="Search by name…"
-                  className="w-full pl-12 pr-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 />
               </div>
               {(results.length > 0 || (searching && query.length >= 2)) && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+                <div className="absolute z-10 w-full mt-1 bg-[#1a2d4f] border border-white/10 rounded-xl shadow-lg overflow-hidden">
                   {searching && (
-                    <div className="px-4 py-3 text-gray-400 text-base">Searching…</div>
+                    <div className="px-4 py-3 text-slate-400 text-base">Searching…</div>
                   )}
                   {!searching && results.map((r) => (
                     <button
                       key={r.id}
                       type="button"
                       onClick={() => selectExisting(r)}
-                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left border-b border-gray-100 last:border-0"
+                      className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 text-left border-b border-white/10 last:border-0"
                     >
-                      <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
-                        <User className="w-4 h-4 text-gray-500" />
+                      <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                        <User className="w-4 h-4 text-slate-400" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-white">
                           {r.first_name} {r.last_name}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-slate-400">
                           {r.phone ?? 'No phone'}{r.dob ? ` · DOB ${r.dob}` : ''}
                         </p>
                       </div>
                     </button>
                   ))}
                   {!searching && results.length === 0 && query.length >= 2 && (
-                    <div className="px-4 py-3 text-gray-500 text-base">
+                    <div className="px-4 py-3 text-slate-400 text-base">
                       No defendants found.{' '}
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, mode: 'new' })}
-                        className="text-[#0f1e3c] font-semibold underline"
+                        className="text-blue-400 font-semibold underline"
                       >
                         Add a new one?
                       </button>
@@ -362,24 +360,24 @@ function StepDefendant({
           <FieldRow>
             <Field>
               <Label required>First Name</Label>
-              <Input value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} placeholder="John" className={errors.firstName ? 'border-red-400' : ''} />
+              <Input value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} placeholder="John" className={errors.firstName ? 'border-red-500/50' : ''} />
               <FieldError message={errors.firstName} />
             </Field>
             <Field>
               <Label required>Last Name</Label>
-              <Input value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} placeholder="Smith" className={errors.lastName ? 'border-red-400' : ''} />
+              <Input value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} placeholder="Smith" className={errors.lastName ? 'border-red-500/50' : ''} />
               <FieldError message={errors.lastName} />
             </Field>
           </FieldRow>
           <FieldRow>
             <Field>
               <Label>Date of Birth</Label>
-              <Input type="date" value={form.dob} onChange={(v) => setForm({ ...form, dob: v })} className={errors.dob ? 'border-red-400' : ''} />
+              <Input type="date" value={form.dob} onChange={(v) => setForm({ ...form, dob: v })} className={errors.dob ? 'border-red-500/50' : ''} />
               <FieldError message={errors.dob} />
             </Field>
             <Field>
               <Label>Phone Number</Label>
-              <Input value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(214) 555-0100" className={errors.phone ? 'border-red-400' : ''} />
+              <Input value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(214) 555-0100" className={errors.phone ? 'border-red-500/50' : ''} />
               <FieldError message={errors.phone} />
             </Field>
           </FieldRow>
@@ -392,7 +390,7 @@ function StepDefendant({
             <select
               value={form.checkinFrequency}
               onChange={(e) => setForm({ ...form, checkinFrequency: e.target.value as CheckinFrequency })}
-              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
+              className={inputCls}
             >
               <option value="weekly">Weekly</option>
               <option value="daily">Daily</option>
@@ -404,7 +402,7 @@ function StepDefendant({
             <select
               value={form.checkinHourCt}
               onChange={(e) => setForm({ ...form, checkinHourCt: Number(e.target.value) })}
-              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
+              className={inputCls}
             >
               {CHECKIN_HOUR_OPTIONS.map((h) => (
                 <option key={h} value={h}>{fmtHour(h)}</option>
@@ -431,24 +429,24 @@ function StepBond({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">Bond Details</h2>
-        <p className="text-gray-500 text-base">Enter the financial and case information.</p>
+        <h2 className="text-2xl font-bold text-white mb-1">Bond Details</h2>
+        <p className="text-slate-400 text-base">Enter the financial and case information.</p>
       </div>
 
       <FieldRow>
         <Field>
           <Label required>Bond Amount</Label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input type="number" value={form.bondAmount} onChange={(v) => setForm({ ...form, bondAmount: v })} placeholder="25000" className={clsx('pl-8', errors.bondAmount && 'border-red-400')} />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-base">$</span>
+            <Input type="number" value={form.bondAmount} onChange={(v) => setForm({ ...form, bondAmount: v })} placeholder="25000" className={clsx('pl-8', errors.bondAmount && 'border-red-500/50')} />
           </div>
           <FieldError message={errors.bondAmount} />
         </Field>
         <Field>
           <Label required>Premium Owed</Label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input type="number" value={form.premiumOwed} onChange={(v) => setForm({ ...form, premiumOwed: v })} placeholder="2500" className={clsx('pl-8', errors.premiumOwed && 'border-red-400')} />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-base">$</span>
+            <Input type="number" value={form.premiumOwed} onChange={(v) => setForm({ ...form, premiumOwed: v })} placeholder="2500" className={clsx('pl-8', errors.premiumOwed && 'border-red-500/50')} />
           </div>
           <FieldError message={errors.premiumOwed} />
         </Field>
@@ -458,8 +456,8 @@ function StepBond({
         <Field>
           <Label>Premium Paid So Far</Label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-lg">$</span>
-            <Input type="number" value={form.premiumPaid} onChange={(v) => setForm({ ...form, premiumPaid: v })} placeholder="0" className={clsx('pl-8', errors.premiumPaid && 'border-red-400')} />
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-base">$</span>
+            <Input type="number" value={form.premiumPaid} onChange={(v) => setForm({ ...form, premiumPaid: v })} placeholder="0" className={clsx('pl-8', errors.premiumPaid && 'border-red-500/50')} />
           </div>
           <FieldError message={errors.premiumPaid} />
         </Field>
@@ -472,7 +470,7 @@ function StepBond({
       <FieldRow>
         <Field>
           <Label>Case Number</Label>
-          <Input value={form.caseNumber} onChange={(v) => setForm({ ...form, caseNumber: v })} placeholder="CR-2026-00123" className={errors.caseNumber ? 'border-red-400' : ''} />
+          <Input value={form.caseNumber} onChange={(v) => setForm({ ...form, caseNumber: v })} placeholder="CR-2026-00123" className={errors.caseNumber ? 'border-red-500/50' : ''} />
           <FieldError message={errors.caseNumber} />
         </Field>
         <Field>
@@ -511,17 +509,17 @@ function StepCosigner({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">Co-Signer</h2>
-        <p className="text-gray-500 text-base">Optional. Add anyone who co-signed the bond.</p>
+        <h2 className="text-2xl font-bold text-white mb-1">Co-Signer</h2>
+        <p className="text-slate-400 text-base">Optional. Add anyone who co-signed the bond.</p>
       </div>
 
       {cosigners.length === 0 && (
-        <div className="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-          <p className="text-gray-500 text-lg mb-4">No co-signers added yet.</p>
+        <div className="text-center py-10 bg-white/5 rounded-xl border-2 border-dashed border-white/10">
+          <p className="text-slate-400 text-lg mb-4">No co-signers added yet.</p>
           <button
             type="button"
             onClick={() => setCosigners([emptyCosigner()])}
-            className="inline-flex items-center gap-2 text-[#0f1e3c] font-semibold text-base hover:underline"
+            className="inline-flex items-center gap-2 text-blue-400 font-semibold text-base hover:underline"
           >
             <Plus className="w-4 h-4" />
             Add Co-Signer
@@ -530,13 +528,13 @@ function StepCosigner({
       )}
 
       {cosigners.map((cosigner, i) => (
-        <div key={i} className="bg-gray-50 rounded-xl p-5 space-y-4 relative">
+        <div key={i} className="bg-white/5 rounded-xl p-5 space-y-4 relative border border-white/10">
           <div className="flex items-center justify-between mb-2">
-            <p className="font-semibold text-gray-700 text-base">Co-Signer {i + 1}</p>
+            <p className="font-semibold text-slate-300 text-base">Co-Signer {i + 1}</p>
             <button
               type="button"
               onClick={() => remove(i)}
-              className="text-red-400 hover:text-red-600 transition-colors"
+              className="text-red-400 hover:text-red-300 transition-colors"
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -572,7 +570,7 @@ function StepCosigner({
               onChange={(e) => update(i, 'assetsDescription', e.target.value)}
               placeholder="2018 Ford F-150, home equity, etc."
               rows={2}
-              className="w-full px-4 py-3 text-lg border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] resize-none"
+              className="w-full px-4 py-3 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
             />
           </Field>
         </div>
@@ -582,7 +580,7 @@ function StepCosigner({
         <button
           type="button"
           onClick={() => setCosigners([...cosigners, emptyCosigner()])}
-          className="flex items-center gap-2 text-[#0f1e3c] font-semibold text-base hover:underline"
+          className="flex items-center gap-2 text-blue-400 font-semibold text-base hover:underline"
         >
           <Plus className="w-4 h-4" />
           Add Another Co-Signer
@@ -606,11 +604,11 @@ function StepCourtDate({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">First Court Date</h2>
-        <p className="text-gray-500 text-base">Add the initial hearing date. You can add more later.</p>
+        <h2 className="text-2xl font-bold text-white mb-1">First Court Date</h2>
+        <p className="text-slate-400 text-base">Add the initial hearing date. You can add more later.</p>
       </div>
 
-      <div className="flex rounded-xl border border-gray-300 overflow-hidden">
+      <div className="flex rounded-xl border border-white/10 overflow-hidden">
         {[false, true].map((skip) => (
           <button
             key={String(skip)}
@@ -619,8 +617,8 @@ function StepCourtDate({
             className={clsx(
               'flex-1 py-3 text-base font-medium transition-colors',
               form.skip === skip
-                ? 'bg-[#0f1e3c] text-white'
-                : 'bg-white text-gray-600 hover:bg-gray-50'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white/5 text-slate-400 hover:bg-white/10'
             )}
           >
             {skip ? 'No court date yet' : 'Enter court date'}
@@ -633,7 +631,7 @@ function StepCourtDate({
           <FieldRow>
             <Field>
               <Label required>Date</Label>
-              <Input type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} className={errors.date ? 'border-red-400' : ''} />
+              <Input type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} className={errors.date ? 'border-red-500/50' : ''} />
               <FieldError message={errors.date} />
             </Field>
             <Field>
@@ -703,11 +701,11 @@ function StepPayments({
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-1">Payment Plan</h2>
-        <p className="text-gray-500 text-base">
+        <h2 className="text-2xl font-bold text-white mb-1">Payment Plan</h2>
+        <p className="text-slate-400 text-base">
           Schedule premium installments.{' '}
           {remainingOwed > 0 && (
-            <span className="font-medium text-gray-700">
+            <span className="font-medium text-slate-300">
               Total owed:{' '}
               {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(remainingOwed)}
             </span>
@@ -716,8 +714,8 @@ function StepPayments({
       </div>
 
       {/* Quick generate */}
-      <div className="bg-blue-50 rounded-xl p-4 flex items-center gap-4 flex-wrap">
-        <span className="text-base font-medium text-gray-700">Generate equal payments:</span>
+      <div className="bg-blue-900/30 border border-blue-500/20 rounded-xl p-4 flex items-center gap-4 flex-wrap">
+        <span className="text-base font-medium text-slate-300">Generate equal payments:</span>
         <div className="flex items-center gap-2">
           <input
             type="number"
@@ -725,26 +723,26 @@ function StepPayments({
             max="36"
             value={numPayments}
             onChange={(e) => setNumPayments(e.target.value)}
-            className="w-20 px-3 py-2 text-lg border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]"
+            className="w-20 px-3 py-2 text-base bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
-          <span className="text-gray-600">payments</span>
+          <span className="text-slate-400">payments</span>
         </div>
         <button
           type="button"
           onClick={generatePayments}
-          className="bg-[#0f1e3c] text-white px-4 py-2 rounded-lg text-base font-medium hover:bg-[#1a2f5a] transition-colors"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-base font-medium hover:bg-blue-700 transition-colors"
         >
           Generate
         </button>
       </div>
 
       {payments.length === 0 && (
-        <div className="text-center py-10 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300">
-          <p className="text-gray-500 text-lg mb-4">No payments scheduled yet.</p>
+        <div className="text-center py-10 bg-white/5 rounded-xl border-2 border-dashed border-white/10">
+          <p className="text-slate-400 text-lg mb-4">No payments scheduled yet.</p>
           <button
             type="button"
             onClick={() => setPayments([emptyPayment()])}
-            className="inline-flex items-center gap-2 text-[#0f1e3c] font-semibold text-base hover:underline"
+            className="inline-flex items-center gap-2 text-blue-400 font-semibold text-base hover:underline"
           >
             <Plus className="w-4 h-4" />
             Add Payment
@@ -755,40 +753,40 @@ function StepPayments({
       {payments.length > 0 && (
         <div className="space-y-3">
           {payments.map((p, i) => (
-            <div key={i} className="bg-gray-50 rounded-xl px-4 py-3 space-y-1">
+            <div key={i} className="bg-white/5 rounded-xl px-4 py-3 space-y-1 border border-white/10">
               <div className="flex items-center gap-3">
-                <span className="text-gray-500 text-sm font-medium w-6 shrink-0">#{i + 1}</span>
+                <span className="text-slate-500 text-sm font-medium w-6 shrink-0">#{i + 1}</span>
                 <div className="flex-1 grid grid-cols-2 gap-3">
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
                     <input
                       type="number"
                       value={p.amountDue}
                       onChange={(e) => update(i, 'amountDue', e.target.value)}
                       placeholder="Amount"
-                      className={clsx('w-full pl-7 pr-3 py-2.5 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]', errors[`payment_${i}_amount`] ? 'border-red-400' : 'border-gray-300')}
+                      className={clsx('w-full pl-7 pr-3 py-2.5 text-base bg-white/5 border rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400', errors[`payment_${i}_amount`] ? 'border-red-500/50' : 'border-white/10')}
                     />
                   </div>
                   <input
                     type="date"
                     value={p.dueDate}
                     onChange={(e) => update(i, 'dueDate', e.target.value)}
-                    className={clsx('w-full px-3 py-2.5 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f1e3c]', errors[`payment_${i}_date`] ? 'border-red-400' : 'border-gray-300')}
+                    className={clsx('w-full px-3 py-2.5 text-base bg-white/5 border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-400', errors[`payment_${i}_date`] ? 'border-red-500/50' : 'border-white/10')}
                   />
                 </div>
-                <button type="button" onClick={() => remove(i)} className="text-red-400 hover:text-red-600 transition-colors shrink-0">
+                <button type="button" onClick={() => remove(i)} className="text-red-400 hover:text-red-300 transition-colors shrink-0">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              {errors[`payment_${i}_amount`] && <p className="text-xs text-red-600 ml-9">{errors[`payment_${i}_amount`]}</p>}
-              {errors[`payment_${i}_date`] && <p className="text-xs text-red-600 ml-9">{errors[`payment_${i}_date`]}</p>}
+              {errors[`payment_${i}_amount`] && <p className="text-xs text-red-400 ml-9">{errors[`payment_${i}_amount`]}</p>}
+              {errors[`payment_${i}_date`] && <p className="text-xs text-red-400 ml-9">{errors[`payment_${i}_date`]}</p>}
             </div>
           ))}
 
           <button
             type="button"
             onClick={() => setPayments([...payments, emptyPayment()])}
-            className="flex items-center gap-2 text-[#0f1e3c] font-semibold text-base hover:underline"
+            className="flex items-center gap-2 text-blue-400 font-semibold text-base hover:underline"
           >
             <Plus className="w-4 h-4" />
             Add Another Payment
@@ -799,10 +797,10 @@ function StepPayments({
               className={clsx(
                 'text-sm font-medium px-4 py-2 rounded-lg',
                 Math.abs(totalScheduled - remainingOwed) < 0.01
-                  ? 'text-green-700 bg-green-50'
+                  ? 'text-green-400 bg-green-900/30'
                   : totalScheduled > remainingOwed
-                  ? 'text-red-700 bg-red-50'
-                  : 'text-yellow-700 bg-yellow-50'
+                  ? 'text-red-400 bg-red-900/30'
+                  : 'text-amber-300 bg-amber-900/30'
               )}
             >
               Scheduled:{' '}
@@ -812,7 +810,7 @@ function StepPayments({
               {' '}premium owed
             </div>
           )}
-          {errors.total && <p className="text-sm text-red-600">{errors.total}</p>}
+          {errors.total && <p className="text-sm text-red-400">{errors.total}</p>}
         </div>
       )}
     </div>
@@ -932,19 +930,19 @@ export default function NewBondPage() {
       <div className="mb-6 md:mb-8">
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-4 transition-colors min-h-[44px]"
+          className="flex items-center gap-1 text-slate-400 hover:text-white text-base mb-4 transition-colors min-h-[44px]"
         >
           <ChevronLeft className="w-4 h-4" />
           Back
         </button>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Add New Bond</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-white">Add New Bond</h1>
       </div>
 
       {/* Progress */}
       <ProgressBar current={step} />
 
       {/* Step content */}
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 md:p-8 mb-6">
+      <div className="bg-[#1a2d4f] rounded-2xl border border-white/10 shadow-lg p-5 md:p-8 mb-6">
         {step === 0 && <StepDefendant form={defendant} setForm={(f) => { setDefendant(f); setFieldErrors({}) }} errors={fieldErrors} />}
         {step === 1 && <StepBond form={bond} setForm={(f) => { setBond(f); setFieldErrors({}) }} errors={fieldErrors} />}
         {step === 2 && <StepCosigner cosigners={cosigners} setCosigners={setCosigners} />}
@@ -960,7 +958,7 @@ export default function NewBondPage() {
       </div>
 
       {submitError && (
-        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-700 text-base">
+        <div className="mb-4 bg-red-900/30 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-base">
           {submitError}
         </div>
       )}
@@ -974,8 +972,8 @@ export default function NewBondPage() {
           className={clsx(
             'flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold transition-colors min-h-[44px]',
             step === 0
-              ? 'text-gray-300 cursor-not-allowed'
-              : 'text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'text-slate-600 cursor-not-allowed'
+              : 'text-slate-300 border border-white/20 hover:bg-white/10'
           )}
         >
           <ChevronLeft className="w-4 h-4" />
@@ -987,7 +985,7 @@ export default function NewBondPage() {
             type="button"
             onClick={next}
             disabled={!proceed}
-            className="flex items-center gap-2 bg-[#0f1e3c] text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-[#1a2f5a] transition-colors min-h-[48px] disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-blue-700 transition-colors min-h-[48px] disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
           >
             Next Step
             <ChevronRight className="w-4 h-4" />

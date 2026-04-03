@@ -65,7 +65,7 @@ export default async function DefendantPage({ params }: Props) {
       {/* Back */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-1 text-gray-500 hover:text-gray-800 text-base mb-5 transition-colors min-h-[44px]"
+        className="inline-flex items-center gap-1 text-slate-400 hover:text-white text-base mb-5 transition-colors min-h-[44px]"
       >
         <ChevronLeft className="w-4 h-4" />
         Back to Dashboard
@@ -81,7 +81,7 @@ export default async function DefendantPage({ params }: Props) {
         {/* Active bonds */}
         {activeBonds.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-white">
               Active Bond{activeBonds.length > 1 ? 's' : ''}
             </h2>
             {activeBonds.map((bond) => (
@@ -100,11 +100,11 @@ export default async function DefendantPage({ params }: Props) {
         )}
 
         {bonds.length === 0 && (
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 text-center">
-            <p className="text-gray-400 text-lg">No bonds on record for this defendant.</p>
+          <div className="bg-[#1a2d4f] rounded-2xl border border-white/10 p-8 text-center">
+            <p className="text-slate-400 text-lg">No bonds on record for this defendant.</p>
             <Link
               href="/bonds/new"
-              className="inline-block mt-4 text-[#0f1e3c] font-semibold hover:underline"
+              className="inline-block mt-4 text-blue-400 font-semibold hover:underline"
             >
               Add a bond →
             </Link>

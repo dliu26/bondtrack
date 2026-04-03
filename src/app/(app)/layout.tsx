@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .eq('read', false)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0f1e3c]">
       <Sidebar userEmail={user.email ?? ''} unreadCount={count ?? 0} />
       <main className="ml-0 md:ml-64 min-h-screen pb-20 md:pb-0">
         {children}

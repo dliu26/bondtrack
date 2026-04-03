@@ -18,9 +18,9 @@ import type { BondsmanSettings } from './actions'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+    <div className="bg-[#1a2d4f] rounded-2xl border border-white/10 shadow-lg overflow-hidden">
+      <div className="px-6 py-4 border-b border-white/10 bg-white/5">
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
       </div>
       <div className="px-6 py-5 space-y-4">{children}</div>
     </div>
@@ -30,12 +30,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function FieldGroup({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+      <label className="block text-sm font-medium text-slate-300 mb-1.5">{label}</label>
       {children}
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
     </div>
   )
 }
+
+const inputBase = 'w-full px-4 py-3 text-base bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed'
 
 function TextInput({
   value,
@@ -59,12 +61,7 @@ function TextInput({
       onChange={onChange ? (e) => onChange(e.target.value) : undefined}
       placeholder={placeholder}
       disabled={disabled}
-      className={clsx(
-        'w-full px-4 py-3 text-base border border-gray-300 rounded-xl',
-        'focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] focus:border-transparent',
-        'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
-        className
-      )}
+      className={clsx(inputBase, className)}
     />
   )
 }
@@ -74,7 +71,7 @@ function SaveButton({ onClick, busy }: { onClick: () => void; busy: boolean }) {
     <button
       onClick={onClick}
       disabled={busy}
-      className="flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75 disabled:opacity-50 min-h-[44px]"
+      className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-blue-700 transition-colors active:scale-95 duration-75 disabled:opacity-50 min-h-[44px]"
     >
       <Check className="w-4 h-4" />
       {busy ? 'Saving…' : 'Save Changes'}
@@ -96,8 +93,8 @@ function Toggle({
   return (
     <div className="flex items-center justify-between gap-4 py-1">
       <div>
-        <p className="text-base font-medium text-gray-800">{label}</p>
-        {description && <p className="text-sm text-gray-500">{description}</p>}
+        <p className="text-base font-medium text-white">{label}</p>
+        {description && <p className="text-sm text-slate-400">{description}</p>}
       </div>
       <button
         type="button"
@@ -106,7 +103,7 @@ function Toggle({
         onClick={() => onChange(!checked)}
         className={clsx(
           'relative w-12 h-6 rounded-full transition-colors duration-200 shrink-0',
-          checked ? 'bg-[#0f1e3c]' : 'bg-gray-300'
+          checked ? 'bg-blue-600' : 'bg-white/20'
         )}
       >
         <span
@@ -147,7 +144,7 @@ function ProfileSection({ settings, email }: { settings: BondsmanSettings | null
       <FieldGroup label="Full Name">
         <TextInput value={name} onChange={setName} placeholder="John Smith" />
       </FieldGroup>
-      <FieldGroup label="Email" >
+      <FieldGroup label="Email">
         <TextInput value={email} disabled />
       </FieldGroup>
       <FieldGroup label="Phone Number" error={errors.phone}>
@@ -155,7 +152,7 @@ function ProfileSection({ settings, email }: { settings: BondsmanSettings | null
           value={phone}
           onChange={setPhone}
           placeholder="(214) 555-0100"
-          className={errors.phone ? 'border-red-400' : ''}
+          className={errors.phone ? 'border-red-500/50' : ''}
         />
       </FieldGroup>
       <FieldGroup label="Agency Name">
@@ -182,10 +179,10 @@ function NotificationsSection({ settings }: { settings: BondsmanSettings | null 
 
   return (
     <Section title="Daily Reminders">
-      <p className="text-sm text-gray-500 -mt-1">
+      <p className="text-sm text-slate-400 -mt-1">
         Control what appears on your dashboard each morning.
       </p>
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-white/10">
         <Toggle
           checked={showDailyList}
           onChange={setShowDailyList}
@@ -218,12 +215,12 @@ function DefaultsSection({ settings }: { settings: BondsmanSettings | null }) {
 
   return (
     <Section title="Default Bond Settings">
-      <p className="text-sm text-gray-500 -mt-1">These values auto-fill when adding a new bond.</p>
+      <p className="text-sm text-slate-400 -mt-1">These values auto-fill when adding a new bond.</p>
       <FieldGroup label="Default Check-in Frequency">
         <select
           value={frequency}
           onChange={(e) => setFrequency(e.target.value as typeof frequency)}
-          className="w-full px-4 py-3 text-base border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f1e3c] bg-white"
+          className={inputBase}
         >
           <option value="weekly">Weekly</option>
           <option value="daily">Daily</option>
@@ -246,7 +243,6 @@ function DefaultsSection({ settings }: { settings: BondsmanSettings | null }) {
 function AccountSection() {
   const router = useRouter()
 
-  // Change password
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -254,7 +250,6 @@ function AccountSection() {
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState(false)
 
-  // Delete
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [deleteError, setDeleteError] = useState('')
@@ -301,7 +296,7 @@ function AccountSection() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
@@ -316,26 +311,26 @@ function AccountSection() {
           />
         </FieldGroup>
         {passwordSuccess && (
-          <p className="text-green-700 text-sm bg-green-50 px-3 py-2 rounded-lg">
+          <p className="text-green-400 text-sm bg-green-900/30 px-3 py-2 rounded-lg">
             Password changed successfully.
           </p>
         )}
         <button
           onClick={handleChangePassword}
           disabled={passwordBusy || !newPassword || !confirmPassword}
-          className="flex items-center gap-2 bg-[#0f1e3c] text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75 disabled:opacity-50 min-h-[44px]"
+          className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl font-medium text-sm hover:bg-blue-700 transition-colors active:scale-95 duration-75 disabled:opacity-50 min-h-[44px]"
         >
           {passwordBusy ? 'Updating…' : 'Update Password'}
         </button>
       </Section>
 
       {/* Danger zone */}
-      <div className="bg-white rounded-2xl border border-red-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-red-100 bg-red-50">
-          <h2 className="text-lg font-semibold text-red-800">Danger Zone</h2>
+      <div className="bg-[#1a2d4f] rounded-2xl border border-red-500/30 shadow-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-red-500/20 bg-red-900/20">
+          <h2 className="text-lg font-semibold text-red-400">Danger Zone</h2>
         </div>
         <div className="px-6 py-5 space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-400">
             Deleting your account is permanent. All bonds, defendants, and data will be removed immediately.
           </p>
           <FieldGroup label="Type DELETE to confirm" error={deleteError}>
@@ -343,7 +338,7 @@ function AccountSection() {
               value={deleteConfirm}
               onChange={setDeleteConfirm}
               placeholder="DELETE"
-              className={deleteError ? 'border-red-400' : ''}
+              className={deleteError ? 'border-red-500/50' : ''}
             />
           </FieldGroup>
           <button

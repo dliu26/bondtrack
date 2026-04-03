@@ -41,17 +41,17 @@ function StatCard({
 }) {
   const valueColor =
     urgent === 'red'
-      ? 'text-red-600'
+      ? 'text-red-400'
       : urgent === 'amber'
-      ? 'text-amber-600'
-      : 'text-[#0f1e3c]'
+      ? 'text-amber-300'
+      : 'text-white'
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-4 py-4 shadow-sm">
-      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1 truncate">
+    <div className="bg-[#1a2d4f] rounded-xl border border-white/10 px-4 py-4 shadow-lg">
+      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1 truncate">
         {label}
       </p>
       <p className={`text-2xl font-bold leading-none ${valueColor}`}>{value}</p>
-      {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+      {subtext && <p className="text-xs text-slate-500 mt-1">{subtext}</p>}
     </div>
   )
 }
@@ -247,17 +247,17 @@ export default async function DashboardPage() {
       <DismissibleBanner />
 
       {/* Page header */}
-      <div className="pb-6 mb-6 border-b border-gray-200">
+      <div className="pb-6 mb-6 border-b border-white/10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-sm text-gray-400 mb-1">
+            <p className="text-sm text-slate-400 mb-1">
               {greeting}{firstName ? `, ${firstName}` : ''}
             </p>
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">Dashboard</h1>
           </div>
           <Link
             href="/bonds/new"
-            className="flex items-center justify-center gap-2 bg-[#0f1e3c] text-white px-4 py-3 md:px-5 rounded-xl font-semibold text-sm md:text-base hover:bg-[#1a2f5a] transition-colors min-h-[44px] sm:shrink-0"
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 md:px-5 rounded-xl font-semibold text-sm md:text-base hover:bg-blue-700 transition-colors min-h-[44px] sm:shrink-0"
           >
             <PlusCircle className="w-5 h-5" />
             Add Bond
@@ -271,7 +271,7 @@ export default async function DashboardPage() {
         <StatCard
           label="Court (14 days)"
           value={courtSoon}
-          subtext={courtSoon === 1 ? 'upcoming' : 'upcoming'}
+          subtext="upcoming"
           urgent={courtSoon > 0 ? 'amber' : undefined}
         />
         <StatCard
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
         <div className="mt-8 flex justify-center">
           <Link
             href="/bonds/history"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors min-h-[44px]"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-white/20 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:border-white/30 transition-colors min-h-[44px]"
           >
             <Archive className="w-4 h-4" />
             Bond History ({closedCount})
@@ -333,17 +333,17 @@ function EmptyDashboard({
       <DismissibleBanner />
 
       {/* Page header */}
-      <div className="pb-6 mb-6 border-b border-gray-200">
+      <div className="pb-6 mb-6 border-b border-white/10">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-sm text-gray-400 mb-1">
+            <p className="text-sm text-slate-400 mb-1">
               {greeting}{firstName ? `, ${firstName}` : ''}
             </p>
-            <h1 className="text-2xl md:text-4xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-white">Dashboard</h1>
           </div>
           <Link
             href="/bonds/new"
-            className="flex items-center justify-center gap-2 bg-[#0f1e3c] text-white px-4 py-3 md:px-5 rounded-xl font-semibold text-sm md:text-base hover:bg-[#1a2f5a] transition-colors min-h-[44px] sm:shrink-0"
+            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-3 md:px-5 rounded-xl font-semibold text-sm md:text-base hover:bg-blue-700 transition-colors min-h-[44px] sm:shrink-0"
           >
             <PlusCircle className="w-5 h-5" />
             Add Bond
@@ -352,17 +352,17 @@ function EmptyDashboard({
       </div>
 
       {/* Empty state */}
-      <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
-        <div className="w-16 h-16 bg-[#0f1e3c]/5 rounded-2xl flex items-center justify-center mx-auto mb-5">
-          <Shield className="w-8 h-8 text-[#0f1e3c]/40" />
+      <div className="text-center py-20 bg-[#1a2d4f] rounded-2xl border border-white/10">
+        <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <Shield className="w-8 h-8 text-white/20" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">No active bonds</h2>
-        <p className="text-gray-500 text-base mb-8 max-w-sm mx-auto">
+        <h2 className="text-2xl font-bold text-white mb-3">No active bonds</h2>
+        <p className="text-slate-400 text-base mb-8 max-w-sm mx-auto">
           Add your first bond to start tracking court dates, payments, and check-ins.
         </p>
         <Link
           href="/bonds/new"
-          className="inline-flex items-center gap-2 bg-[#0f1e3c] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-[#1a2f5a] transition-colors active:scale-95 duration-75 min-h-[44px]"
+          className="inline-flex items-center gap-2 bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors active:scale-95 duration-75 min-h-[44px]"
         >
           <PlusCircle className="w-5 h-5" />
           Add Your First Bond
@@ -373,7 +373,7 @@ function EmptyDashboard({
         <div className="mt-8 flex justify-center">
           <Link
             href="/bonds/history"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-colors min-h-[44px]"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-white/20 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:border-white/30 transition-colors min-h-[44px]"
           >
             <Archive className="w-4 h-4" />
             Bond History ({closedCount})

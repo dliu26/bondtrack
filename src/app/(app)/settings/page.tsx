@@ -14,9 +14,9 @@ export default async function SettingsPage() {
 
   return (
     <div className="px-4 py-4 md:px-8 md:py-8 max-w-2xl">
-      <div className="pb-6 mb-6 border-b border-gray-200">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your profile, notifications, and account.</p>
+      <div className="pb-6 mb-6 border-b border-white/10">
+        <h1 className="text-3xl md:text-4xl font-bold text-white">Settings</h1>
+        <p className="text-slate-400 mt-1">Manage your profile, notifications, and account.</p>
       </div>
       <SettingsForm settings={settings} email={user.email ?? ''} />
     </div>

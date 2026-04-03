@@ -10,7 +10,7 @@ export default function PastBondsSection({ count, children }: { count: number; c
     <div>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 text-gray-500 hover:text-gray-800 font-semibold text-lg transition-colors w-full text-left py-2"
+        className="flex items-center gap-2 text-slate-400 hover:text-white font-semibold text-lg transition-colors w-full text-left py-2"
       >
         {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
         Past Bonds ({count})
