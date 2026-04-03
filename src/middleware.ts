@@ -32,7 +32,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  const publicPaths = ['/', '/login', '/privacy']
+  const publicPaths = ['/', '/login', '/privacy', '/terms']
 
   // Unauthenticated user trying to access protected route
   if (!user && !publicPaths.includes(pathname)) {

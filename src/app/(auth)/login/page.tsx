@@ -1,12 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { signIn, signUp } from './actions'
 
 export default function LoginPage() {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [agreed, setAgreed] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -79,6 +81,28 @@ export default function LoginPage() {
               />
             </div>
 
+            {mode === 'signup' && (
+              <div className="flex items-start gap-3">
+                <input
+                  id="agree"
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-[#0f1e3c] focus:ring-[#0f1e3c] shrink-0 cursor-pointer"
+                />
+                <label htmlFor="agree" className="text-sm text-gray-600 leading-snug cursor-pointer">
+                  I agree to the{' '}
+                  <Link href="/terms" target="_blank" className="text-[#0f1e3c] font-semibold hover:underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" target="_blank" className="text-[#0f1e3c] font-semibold hover:underline">
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+            )}
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-700 text-base">
                 {error}
@@ -87,7 +111,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === 'signup' && !agreed)}
               className="w-full bg-[#0f1e3c] text-white text-lg font-semibold py-3.5 rounded-xl hover:bg-[#1a2f5a] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading

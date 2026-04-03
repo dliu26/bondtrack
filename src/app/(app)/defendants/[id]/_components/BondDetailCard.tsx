@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { PlusCircle, Calendar, CreditCard, User, Clock, Check } from 'lucide-react'
+import { PlusCircle, Calendar, CreditCard, User, Clock, Check, AlertTriangle } from 'lucide-react'
 import clsx from 'clsx'
 import {
   updateCourtDateStatus,
@@ -136,6 +136,15 @@ function CourtDateRow({
                 daysTo <= 3 ? 'bg-red-100 text-red-700' : daysTo <= 14 ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-600'
               )}>
                 {daysTo === 0 ? 'Today' : daysTo < 0 ? `${Math.abs(daysTo)}d ago` : `${daysTo}d away`}
+              </span>
+            )}
+            {cd.source === 'scraped' && (
+              <span
+                title="Auto-scraped — verify with court"
+                className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 cursor-default"
+              >
+                <AlertTriangle className="w-3 h-3" />
+                Auto-scraped
               </span>
             )}
           </div>

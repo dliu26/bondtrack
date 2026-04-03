@@ -47,6 +47,7 @@ export interface CourtDate {
   status: CourtDateStatus
   reminder_sent_14d: boolean
   reminder_sent_3d: boolean
+  source: 'manual' | 'scraped'
 }
 
 export interface Checkin {

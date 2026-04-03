@@ -106,9 +106,10 @@ export default async function RootPage() {
       <footer className="bg-white border-t border-gray-200 px-6 py-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-gray-500">
           <Link href="/" className="hover:text-gray-800 transition-colors">© 2026 BondTrack Software. All rights reserved.</Link>
-          <Link href="/privacy" className="hover:text-gray-800 transition-colors">
-            Privacy Policy
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-gray-800 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-gray-800 transition-colors">Terms of Service</Link>
+          </div>
         </div>
       </footer>
     </div>

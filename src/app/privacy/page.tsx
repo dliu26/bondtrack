@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import ContactForm from './ContactForm'
 
 export const metadata = {
   title: 'Privacy Policy — BondTrack',
@@ -27,73 +26,53 @@ export default function PrivacyPage() {
       <main className="flex-1 px-6 py-12 md:py-16">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
-          <p className="text-sm text-gray-500 mb-10">Last updated: March 2026</p>
+          <p className="text-sm text-gray-500 mb-10">Last Updated: April 2026</p>
 
-          <div className="space-y-8 text-gray-700 leading-relaxed">
-            <p>
-              BondTrack Software (&lsquo;we&rsquo;, &lsquo;us&rsquo;, &lsquo;our&rsquo;) operates{' '}
-              <span className="font-medium">bondtrack-ochre.vercel.app</span>. This page explains
-              how we handle your data.
-            </p>
+          <div className="space-y-7 text-gray-700 leading-relaxed">
 
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Data we collect</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1.5">What we collect</h2>
               <p>
-                Name, email address, and bond management data you enter including defendant
-                information, court dates, and payment records.
+                Your account info (name, email, agency name) and the bond and defendant data you enter into
+                the platform. We don&rsquo;t collect data directly from defendants — that information comes
+                from you.
               </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">How we use your data</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1.5">How we use it</h2>
               <p>
-                Solely to provide the BondTrack service. We do not sell, share, or disclose your
-                data to any third party.
+                To run BondTrack. We don&rsquo;t sell your data, share it with advertisers, or use it for
+                anything other than operating the platform.
               </p>
             </section>
 
             <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Data storage</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1.5">Your data</h2>
               <p>
-                Your data is stored securely using Supabase. Each account can only access its own
-                data.
+                You can delete your account and all associated data at any time from the Settings page, or by
+                emailing{' '}
+                <a href="mailto:support@bondtrack.app" className="text-[#0f1e3c] font-medium hover:underline">
+                  support@bondtrack.app
+                </a>
+                . We delete everything within 30 days. We use{' '}
+                <span className="font-medium">Supabase</span> for storage and{' '}
+                <span className="font-medium">Vercel</span> for hosting.
               </p>
             </section>
 
-            <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Beta disclaimer</h2>
-              <p>
-                BondTrack is currently in beta. It is a workflow management tool only. You are
-                solely responsible for verifying all court dates, monitoring defendants, and meeting
-                all legal obligations. BondTrack assumes no liability for missed court appearances,
-                bond forfeitures, or any legal or financial consequences arising from use of this
-                platform.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Data deletion</h2>
-              <p>
-                You can delete your account and all associated data at any time from the Settings
-                page.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-lg font-semibold text-gray-900 mb-2">Privacy questions</h2>
-              <p className="mb-6">
-                For any privacy questions, use the contact form on this page.
-              </p>
-              <ContactForm />
-            </section>
           </div>
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-gray-200 px-6 py-8">
-        <div className="max-w-2xl mx-auto text-sm text-gray-500">
+        <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-gray-500">
           <p>© 2026 BondTrack Software. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-gray-800 transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-gray-800 transition-colors">Terms of Service</Link>
+          </div>
         </div>
       </footer>
     </div>

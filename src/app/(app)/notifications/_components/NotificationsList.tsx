@@ -60,7 +60,7 @@ export default function NotificationsList({
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 mb-6">
+      <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Notifications</h1>
           {unreadCount > 0 && (
@@ -81,6 +81,9 @@ export default function NotificationsList({
           </button>
         )}
       </div>
+      <p className="text-sm text-gray-400 mb-6">
+        Notification delivery is not guaranteed. Always verify critical deadlines independently.
+      </p>
 
       {/* List */}
       {notifications.length === 0 ? (

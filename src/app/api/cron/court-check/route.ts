@@ -170,6 +170,7 @@ export async function GET(request: Request) {
           time: found.time,
           location: found.location,
           status: 'upcoming',
+          source: 'scraped',
         })
 
         const message = `Court date change detected for case ${bond.case_number}: new hearing on ${format(parseISO(found.date), 'MMMM d, yyyy')}. Check the portal to confirm.`

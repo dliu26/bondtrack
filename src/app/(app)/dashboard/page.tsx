@@ -4,6 +4,7 @@ import { PlusCircle, Archive } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import BondCard from '@/components/BondCard'
 import TodaysFocus from './_components/TodaysFocus'
+import DismissibleBanner from './_components/DismissibleBanner'
 import {
   calculateUrgency,
   getDaysToDate,
@@ -177,6 +178,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-4 py-4 md:px-8 md:py-8 max-w-6xl">
+      <DismissibleBanner />
+
       {/* Page header */}
       <div className="flex items-start justify-between gap-3 mb-6 md:mb-8">
         <div>
@@ -239,6 +242,7 @@ export default async function DashboardPage() {
 function EmptyDashboard({ closedCount }: { closedCount: number }) {
   return (
     <div className="px-4 py-4 md:px-8 md:py-8 max-w-6xl">
+      <DismissibleBanner />
       <div className="flex items-center justify-between mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
         <Link
