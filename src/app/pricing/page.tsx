@@ -50,13 +50,8 @@ export default function PricingPage() {
           </div>
 
           {/* Trial callout */}
-          <p className="text-center text-green-400 text-sm font-medium mb-2">
-            30-day free trial — no credit card required
-          </p>
-
-          {/* Fine print */}
-          <p className="text-center text-white/40 text-sm mb-8">
-            No setup fees. Cancel with 30 days notice.
+          <p className="text-center text-green-400 text-sm font-medium mb-8">
+            30-day free trial, then $79/month. Cancel anytime with 30 days notice.
           </p>
 
           {/* Feature list */}

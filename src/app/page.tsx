@@ -133,7 +133,7 @@ export default async function RootPage() {
           href="/pricing"
           className="relative mt-10 inline-flex items-center gap-2 bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors active:scale-95 duration-75"
         >
-          Get Started Free — No Credit Card Required
+          Get Started Free
           <ArrowRight className="w-5 h-5" />
         </Link>
       </section>
